@@ -13,6 +13,7 @@
   "dependencies": {
     "bunyan": "latest",
     "deepmerge": "latest",
+    "discord.js": "latest",
     "load-json-file": "latest",
     "moment": "latest",
     "redis": "latest",

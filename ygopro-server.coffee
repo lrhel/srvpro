@@ -10,6 +10,7 @@ exec = require('child_process').exec
 execFile = require('child_process').execFile
 spawn = require('child_process').spawn
 spawnSync = require('child_process').spawnSync
+botServer = require('./botserver.js')
 
 # 三方库
 _ = require 'underscore'
@@ -1126,6 +1127,7 @@ class Room
       @process.stderr.on 'data', (data)=>
         data = "Debug: " + data
         data = data.replace(/\n$/, "")
+        botServer.write2(data)
         log.info "YGOPRO " + data
         ygopro.stoc_send_chat_to_room this, data, ygopro.constants.COLORS.RED
         @has_ygopro_error = true
@@ -3378,6 +3380,7 @@ spawn_windbot = () ->
   windbot_parameters.push('ServerPort='+settings.modules.windbot.port)
   windbot_process = spawn windbot_bin, windbot_parameters, {cwd: 'windbot'}
   windbot_process.on 'error', (err)->
+    botServer.write('WindBot ERROR '+ err)
     log.warn 'WindBot ERROR', err
     if windbot_looplimit < 1000 and !rebooted
       windbot_looplimit++
@@ -3395,6 +3398,7 @@ spawn_windbot = () ->
     return
   windbot_process.stderr.setEncoding('utf8')
   windbot_process.stderr.on 'data', (data)->
+    botServer.write('WindBot Error:'+ data)
     log.warn 'WindBot Error:', data
     return
   return
