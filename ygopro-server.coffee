@@ -10,7 +10,13 @@ exec = require('child_process').exec
 execFile = require('child_process').execFile
 spawn = require('child_process').spawn
 spawnSync = require('child_process').spawnSync
-botServer = require('./botserver.js')
+
+# dummy class to be overwritten if bot token is provided
+botServer = {
+	connect: -> {},
+	write: -> {},
+	write2: -> {},
+}
 
 # 三方库
 _ = require 'underscore'
@@ -211,6 +217,9 @@ if settings.modules.update_util.password
 #finish
 if imported
   setting_save(settings)
+if settings.bot_token.length > 0
+  botServer = require('./botserver.js')
+  botServer.connect(settings.bot_token)
 
 # 读取数据
 default_data = loadJSON('./data/default_data.json')

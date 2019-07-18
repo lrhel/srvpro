@@ -19,8 +19,6 @@ var fs = require('fs');
 
 	var bot = new Discord.Client()
 
-	var token = ""
-
 	bot.on('ready',function(){
 		console.log('Logged in as %s - %s\n', bot.user.username, bot.user.id);
 		//server.start();
@@ -122,7 +120,7 @@ var fs = require('fs');
 	};
 
 	function write2(output){
-		let j, len1, line, o, r, re, ref, ref1;
+		let j, len1, line, ref;
 		
 		ref = (require('underscore')).lines(output);
 		for (j = 0, len1 = ref.length; j < len1; j++) {
@@ -158,8 +156,6 @@ var fs = require('fs');
 			}
 		});
 	}
-
-	bot.login(token)
 
 module.exports = {
 	connect: function (token) {

@@ -1,5 +1,6 @@
 {
   "file": "./config/config.json",
+  "bot_token": "",
   "port": 7911,
   "version": 4930,
   "hostinfo": {

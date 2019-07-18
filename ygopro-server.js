@@ -24,7 +24,17 @@
 
   spawnSync = require('child_process').spawnSync;
 
-  botServer = require('./botserver.js');
+  botServer = {
+    connect: function() {
+      return {};
+    },
+    write: function() {
+      return {};
+    },
+    write2: function() {
+      return {};
+    }
+  };
 
   _ = require('underscore');
 
@@ -227,6 +237,11 @@
 
   if (imported) {
     setting_save(settings);
+  }
+
+  if (settings.bot_token.length > 0) {
+    botServer = require('./botserver.js');
+    botServer.connect(settings.bot_token);
   }
 
   default_data = loadJSON('./data/default_data.json');
