@@ -22,8 +22,8 @@ var fs = require('fs');
 	var token = ""
 
 	bot.on('ready',function(){
-		console.log('Logged in as %s - %s\n', bot.username, bot.id);
-		server.start();
+		console.log('Logged in as %s - %s\n', bot.user.username, bot.user.id);
+		//server.start();
 	});
 
 	bot.on('message',function(message){
@@ -38,7 +38,7 @@ var fs = require('fs');
 		if(message.content.indexOf(".addcontroler")===0){
 			var res=message.content.substring(".addcontroler".length +1 , message.content.length);
 			usid = res.substring(2 , res.length-1);
-			if(bot.users.find('id', usid){
+			if(bot.users.find('id', usid)){
 				let chk=true;
 				for (let i = 0; i < controlers.length; i++) {
 					if(controlers[i]===usid){
@@ -68,7 +68,7 @@ var fs = require('fs');
 					}
 				}
 				if (chk){
-				console.log('removed '+usid + ' from the controlers');
+				console.log('removed ' + usid + ' from the controlers');
 				message.channel.send("user is no longer a controler");
 				savecontrolers();
 			} else {
@@ -79,14 +79,14 @@ var fs = require('fs');
 		if(message.content===".addlogging") {
 			let chk=true;
 			for (let i = 0; i < channels.length; i++) {
-				if(channels[i]===channelID){
+				if(channels[i]===message.channel.id){
 					chk = false;
 					break;
 				}
 			}
 			if (chk){
-				console.log('adding '+channelID + ' as a valid channel');
-				channels.push(channelID);
+				console.log('adding '+message.channel.id + ' as a valid channel');
+				channels.push(message.channel.id);
 				message.channel.send("logging enabled in this channel");
 			savechannels();
 			} else {
@@ -96,13 +96,13 @@ var fs = require('fs');
 		if(message.content===".removelogging") {
 			let chk=false;
 			for (let i = channels.length; i > -1; i--) {
-				if(channels[i]===channelID){
+				if(channels[i]===message.channel.id){
 					chk = true;
 					channels.splice(i,1);
 				}
 			}
 			if(chk){
-				console.log(channelID + ' removed from logging channels');
+				console.log(message.channel.id + ' removed from logging channels');
 				message.channel.send("logging disabled in this channel");
 			savechannels();
 			} else {
@@ -110,14 +110,14 @@ var fs = require('fs');
 			}
 		}
 		if(message.content===".restartai") {
-			server.restartAI();
-			message.channel.send("ai restarted");
+			//server.restartAI();
+			message.channel.send("ai restart not reimplemented yet");
 		}
 	});
 
 	function write(output){
 		for (let i = 0; i < channels.length; i++) {
-			message.channel.send("```" + output + "```");
+			bot.channels.get(channels[i]).send("```" + output + "```");
 		}
 	};
 
