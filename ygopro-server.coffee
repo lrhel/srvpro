@@ -2232,8 +2232,7 @@ ygopro.ctos_follow 'JOIN_GAME', false, (buffer, info, client, server, datas)->
         ygopro.stoc_send_chat_to_room(room, "#{client.name} ${watch_join}")
         room.watchers.push client
         ygopro.stoc_send_chat(client, "${watch_watching}", ygopro.constants.COLORS.BABYBLUE)
-        for buffer in room.watcher_buffers
-          client.write buffer
+        room.connect(client)
       else
         ygopro.stoc_die(client, "${watch_denied}")
     else if room.hostinfo.no_watch and room.players.length >= (if room.hostinfo.mode == 2 then 4 else 2)
@@ -2709,21 +2708,6 @@ ygopro.stoc_follow 'HS_PLAYER_CHANGE', false, (buffer, info, client, server, dat
         #log.info "all ready"
         setTimeout (()-> wait_room_start(ROOM_all[client.rid], settings.modules.random_duel.ready_time);return), 1000
   return
-
-ygopro.ctos_follow 'REQUEST_FIELD', true, (buffer, info, client, server, datas)->
-  return true
-
-ygopro.stoc_follow 'FIELD_FINISH', true, (buffer, info, client, server, datas)->
-  room=ROOM_all[client.rid]
-  return true unless room and settings.modules.reconnect.enabled
-  client.reconnecting = false
-  if client.time_confirm_required # client did not send TIME_CONFIRM
-    client.waiting_for_last = true
-  else if client.last_game_msg and client.last_game_msg_title != 'WAITING' # client sent TIME_CONFIRM
-    if client.last_hint_msg
-      ygopro.stoc_send(client, 'GAME_MSG', client.last_hint_msg)
-    ygopro.stoc_send(client, 'GAME_MSG', client.last_game_msg)
-  return true
 
 ygopro.stoc_follow 'DUEL_END', false, (buffer, info, client, server, datas)->
   room=ROOM_all[client.rid]

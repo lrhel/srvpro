@@ -2344,7 +2344,7 @@
   });
 
   ygopro.ctos_follow('JOIN_GAME', false, function(buffer, info, client, server, datas) {
-    var buffer_handle_callback, check_buffer_indentity, len2, len3, m, match_permit_callback, n, name, pre_room, ref2, ref3, replay_id, room;
+    var buffer_handle_callback, check_buffer_indentity, len2, m, match_permit_callback, name, pre_room, ref2, replay_id, room;
     info.pass = info.pass.trim();
     client.pass = info.pass;
     if (settings.modules.stop) {
@@ -2778,11 +2778,7 @@
           ygopro.stoc_send_chat_to_room(room, client.name + " ${watch_join}");
           room.watchers.push(client);
           ygopro.stoc_send_chat(client, "${watch_watching}", ygopro.constants.COLORS.BABYBLUE);
-          ref3 = room.watcher_buffers;
-          for (n = 0, len3 = ref3.length; n < len3; n++) {
-            buffer = ref3[n];
-            client.write(buffer);
-          }
+          room.connect(client);
         } else {
           ygopro.stoc_die(client, "${watch_denied}");
         }
@@ -3397,28 +3393,6 @@
         }
       }
     }
-  });
-
-  ygopro.ctos_follow('REQUEST_FIELD', true, function(buffer, info, client, server, datas) {
-    return true;
-  });
-
-  ygopro.stoc_follow('FIELD_FINISH', true, function(buffer, info, client, server, datas) {
-    var room;
-    room = ROOM_all[client.rid];
-    if (!(room && settings.modules.reconnect.enabled)) {
-      return true;
-    }
-    client.reconnecting = false;
-    if (client.time_confirm_required) {
-      client.waiting_for_last = true;
-    } else if (client.last_game_msg && client.last_game_msg_title !== 'WAITING') {
-      if (client.last_hint_msg) {
-        ygopro.stoc_send(client, 'GAME_MSG', client.last_hint_msg);
-      }
-      ygopro.stoc_send(client, 'GAME_MSG', client.last_game_msg);
-    }
-    return true;
   });
 
   ygopro.stoc_follow('DUEL_END', false, function(buffer, info, client, server, datas) {
