@@ -4,6 +4,7 @@
         "HAND_RESULT": "CTOS_HandResult",
         "TP_RESULT": "CTOS_TPResult",
         "PLAYER_INFO": "CTOS_PlayerInfo",
+        "CREATE_GAME":"CTOS_CreateGame",
         "JOIN_GAME":"CTOS_JoinGame",
         "HS_KICK":"CTOS_Kick",
         "UPDATE_DECK": "deck",
