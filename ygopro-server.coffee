@@ -1774,10 +1774,11 @@ ygopro.ctos_follow 'JOIN_GAME', false, (buffer, info, client, server, datas)->
 #log.info info
   info.pass=info.pass.trim()
   client.pass = info.pass
-  if CLIENT_is_able_to_reconnect(client) or CLIENT_is_able_to_kick_reconnect(client)
-    CLIENT_pre_reconnect(client)
-    return
-  else if settings.modules.stop
+  # if CLIENT_is_able_to_reconnect(client) or CLIENT_is_able_to_kick_reconnect(client)
+    # CLIENT_pre_reconnect(client)
+    # return
+  # else 
+  if settings.modules.stop
     ygopro.stoc_die(client, settings.modules.stop)
   else if info.pass == "Marshtomp" or info.pass == "the Big Brother"
     ygopro.stoc_die(client, "${bad_user_name}")

@@ -2257,10 +2257,7 @@
     var buffer_handle_callback, check_buffer_indentity, len2, len3, m, match_permit_callback, n, name, pre_room, ref2, ref3, replay_id, room;
     info.pass = info.pass.trim();
     client.pass = info.pass;
-    if (CLIENT_is_able_to_reconnect(client) || CLIENT_is_able_to_kick_reconnect(client)) {
-      CLIENT_pre_reconnect(client);
-      return;
-    } else if (settings.modules.stop) {
+    if (settings.modules.stop) {
       ygopro.stoc_die(client, settings.modules.stop);
     } else if (info.pass === "Marshtomp" || info.pass === "the Big Brother") {
       ygopro.stoc_die(client, "${bad_user_name}");
