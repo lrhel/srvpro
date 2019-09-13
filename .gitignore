@@ -3,6 +3,9 @@ jsconfig.json
 coffeelint.json
 .vscode/
 
+channels.txt
+controlers.txt
+
 password.json
 config.*.json
 config.user.bak
