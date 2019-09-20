@@ -1041,6 +1041,7 @@ class Room
     @first_list = []
     update_core_paths()
     @core_path = get_latest_core_path()
+    @unique_id = Date.now().getUnixTime() + cloud_replay_id
     ROOM_all.push this
 
     #if lflists.length
@@ -3127,6 +3128,7 @@ if settings.modules.http
           draw_count : room.hostinfo.info.draw_count,
           time_limit : room.hostinfo.info.time_limit,
           rule : room.hostinfo.info.rule,
+          unique_id : room.unique_id,
           users: _.sortBy((for player in room.players when player.pos?
             id: (-1).toString(),
             name: player.name,
