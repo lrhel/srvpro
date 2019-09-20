@@ -681,6 +681,10 @@ ROOM_find_by_pid = global.ROOM_find_by_pid = (pid)->
   _.find ROOM_all, (room)->
     return room and room.process_pid == pid
 
+ROOM_find_by_game_id = global.ROOM_find_by_game_id = (id)->
+  _.find ROOM_all, (room)->
+    return room and room.game_id == id
+
 ROOM_validate = global.ROOM_validate = (name)->
   client_name_and_pass = name.split('$', 2)
   client_name = client_name_and_pass[0]
@@ -1040,7 +1044,7 @@ class Room
     update_core_paths()
     @core_path = get_latest_core_path()
     #now = new Date().getTime();
-    @unique_id = new Date().getTime() + @cloud_replay_id
+    @game_id = new Date().getTime() + @cloud_replay_id
     ROOM_all.push this
 
     #if lflists.length
@@ -1795,6 +1799,9 @@ ygopro.ctos_follow 'CREATE_GAME', false, (buffer, info, client, server, datas)->
     client.setTimeout(600000) #连接后超时5分钟
     client.rid = _.indexOf(ROOM_all, room)
     room.connect(client)
+    ygopro.stoc_send(client, 'CREATE_GAME', {
+      gameid: room.unique_id
+    })
   return
 
 ygopro.ctos_follow 'JOIN_GAME', false, (buffer, info, client, server, datas)->
@@ -1856,7 +1863,7 @@ ygopro.ctos_follow 'JOIN_GAME', false, (buffer, info, client, server, datas)->
     #  #ygopro.stoc_send_chat(client, "看起来你是YGOMobile的用户，请记得更新先行卡补丁，否则会看到白卡", ygopro.constants.COLORS.GREEN)
 
     #log.info 'join_game',info.pass, client.name
-    room = ROOM_find_by_pid(info.gameid)
+    room = ROOM_find_by_game_id(info.gameid)
     if !room
       ygopro.stoc_die(client, "${server_full}")
     else if room.error
@@ -3114,7 +3121,7 @@ if settings.modules.http
       else
         response.writeHead(200)
         roomsjson = JSON.stringify rooms: (for room in ROOM_all when room and room.established
-          roomid: room.process_pid.toString(),
+          roomid: room.game_id,
           roomname: room.name,
           roommode: room.hostinfo.info.mode,
           needpass: !!room.pass,
@@ -3127,7 +3134,6 @@ if settings.modules.http
           draw_count : room.hostinfo.info.draw_count,
           time_limit : room.hostinfo.info.time_limit,
           rule : room.hostinfo.info.rule,
-          unique_id : room.unique_id,
           users: _.sortBy((for player in room.players when player.pos?
             id: (-1).toString(),
             name: player.name,
