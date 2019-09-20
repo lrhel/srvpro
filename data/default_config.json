@@ -3,6 +3,7 @@
   "bot_token": "",
   "port": 7911,
   "version": 4930,
+  "live_core": true,
   "hostinfo": {
     "lflist": 0,
     "rule": 0,
@@ -221,35 +222,22 @@
       ]
     },
     "webhook": {
-      "enabled": false,
+      "enabled": true,
       "port": 7966,
       "password": "123456",
       "hooks": {
-        "ygopro": {
-          "path": "./ygopro/",
+        "live2019": {
+          "path": "./ygopro/expansions/live2019",
           "remote": "origin",
-          "branch": "server",
+          "branch": "master",
           "forced": false,
           "callback": {
             "command": "bash",
             "args": [
               "-c",
-              "cd ocgcore ; git pull origin master ; cd ../script ; git pull origin master ; cd .. ; ~/premake5 gmake ; cd build ; make config=release ; cd .. ; strip ygopro"
+              "./check_core.sh"
             ],
-            "path": "./ygopro/"
-          }
-        },
-        "srvpro": {
-          "path": ".",
-          "remote": "origin",
-          "branch": "master",
-          "forced": false,
-          "callback": {
-            "command": "npm",
-            "args": [
-              "install"
-            ],
-            "path": "."
+            "path": "./"
           }
         }
       }

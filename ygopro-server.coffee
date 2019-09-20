@@ -10,6 +10,7 @@ exec = require('child_process').exec
 execFile = require('child_process').execFile
 spawn = require('child_process').spawn
 spawnSync = require('child_process').spawnSync
+rmdir = require 'rimraf'
 
 # dummy class to be overwritten if bot token is provided
 botServer = {
@@ -451,6 +452,8 @@ setInterval(get_memory_usage, 3000)
 
 Cloud_replay_ids = global.Cloud_replay_ids = []
 
+CORES_list = global.CORES_list = []
+
 ROOM_all = global.ROOM_all = []
 ROOM_players_oppentlist = global.ROOM_players_oppentlist = {}
 ROOM_players_banned = global.ROOM_players_banned = []
@@ -474,6 +477,36 @@ ban_user = global.ban_user = (name) ->
         CLIENT_kick(player)
         continue
   return
+
+update_core_paths = global.update_core_paths = () ->
+if settings.live_core
+    files = fs.readdirSync("./ygopro/cores")
+    dirs = []
+    for file in files
+        if file[0] != '.'
+            filePath = "./ygopro/cores/#{file}"
+            stat = fs.statSync(filePath)
+            if stat.isDirectory()
+                dirs.push(file)
+    _.sortBy(dirs, (name)-> return name)
+    CORES_list = dirs
+    return dirs.pop()
+
+get_latest_core_path = global.get_latest_core_path = () ->
+if settings.live_core
+    return CORES_list[..].pop()
+else
+    return 
+
+delete_outdated_cores = global.delete_outdated_cores = () ->
+if settings.live_core
+    update_core_paths()
+    for path in CORES_list[..].pop()
+        room = _.find ROOM_all, (room)->
+            path == room.core_path
+        if room
+           rmdir "./ygopro/cores/#{path}", (error)->
+    update_core_paths()
 
 # automatically ban user to use random duel
 ROOM_ban_player = global.ROOM_ban_player = (name, ip, reason, countadd = 1)->
@@ -1006,6 +1039,8 @@ class Room
     @duel_stage = ygopro.constants.DUEL_STAGE.BEGIN
     @replays = []
     @first_list = []
+    update_core_paths()
+    @core_path = get_latest_core_path()
     ROOM_all.push this
 
     #if lflists.length
@@ -1014,7 +1049,7 @@ class Room
     #else
      # @hostinfo.lflist =  -1
     try
-      @process = spawn './ygopro', [0], {cwd: 'ygopro'}
+      @process = spawn './ygopro', (if @core_path then [0, core_path] else [0]), {cwd: 'ygopro'}
       @process_pid = @process.pid
       @process.on 'error', (err)=>
         _.each @players, (player)->
@@ -1181,6 +1216,7 @@ class Room
     ROOM_all[index] = null unless index == -1
     #ROOM_all.splice(index, 1) unless index == -1
     roomlist.delete this if !@windbot and @established and settings.modules.http.websocket_roomlist
+    delete_outdated_cores()
     return
 
   get_playing_player: ->
