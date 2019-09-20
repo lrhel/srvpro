@@ -3,7 +3,7 @@
   "bot_token": "",
   "port": 7911,
   "version": 4930,
-  "live_core": true,
+  "live_core": false,
   "hostinfo": {
     "lflist": 0,
     "rule": 0,
@@ -222,7 +222,7 @@
       ]
     },
     "webhook": {
-      "enabled": true,
+      "enabled": false,
       "port": 7966,
       "password": "123456",
       "hooks": {

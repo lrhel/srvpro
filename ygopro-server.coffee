@@ -493,20 +493,18 @@ if settings.live_core
     return dirs.pop()
 
 get_latest_core_path = global.get_latest_core_path = () ->
-if settings.live_core
-    return CORES_list[..].pop()
-else
-    return 
+    if settings.live_core
+        return CORES_list[..].pop()
 
 delete_outdated_cores = global.delete_outdated_cores = () ->
-if settings.live_core
-    update_core_paths()
-    for path in CORES_list[..].pop()
-        room = _.find ROOM_all, (room)->
-            path == room.core_path
-        if room
-           rmdir "./ygopro/cores/#{path}", (error)->
-    update_core_paths()
+    if settings.live_core
+        update_core_paths()
+        for path in CORES_list[..].pop()
+            room = _.find ROOM_all, (room)->
+                path == room.core_path
+            if room
+               rmdir "./ygopro/cores/#{path}", (error)->
+        update_core_paths()
 
 # automatically ban user to use random duel
 ROOM_ban_player = global.ROOM_ban_player = (name, ip, reason, countadd = 1)->
@@ -1041,7 +1039,8 @@ class Room
     @first_list = []
     update_core_paths()
     @core_path = get_latest_core_path()
-    @unique_id = Date.now().getUnixTime() + cloud_replay_id
+    #now = new Date().getTime();
+    @unique_id = new Date().getTime() + @cloud_replay_id
     ROOM_all.push this
 
     #if lflists.length
