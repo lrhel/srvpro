@@ -1044,7 +1044,7 @@ class Room
     update_core_paths()
     @core_path = get_latest_core_path()
     #now = new Date().getTime();
-    @game_id = new Date().getTime() + @cloud_replay_id
+    @game_id = ((Math.floor(new Date().getTime() / 4) + @cloud_replay_id) & 0xffffffff)
     ROOM_all.push this
 
     #if lflists.length
@@ -1800,7 +1800,7 @@ ygopro.ctos_follow 'CREATE_GAME', false, (buffer, info, client, server, datas)->
     client.rid = _.indexOf(ROOM_all, room)
     room.connect(client)
     ygopro.stoc_send(client, 'CREATE_GAME', {
-      gameid: room.unique_id
+      gameid: room.game_id
     })
   return
 
