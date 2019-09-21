@@ -1750,7 +1750,6 @@ ygopro.ctos_follow 'PLAYER_INFO', true, (buffer, info, client, server, datas)->
   return false
 
 ygopro.ctos_follow 'CREATE_GAME', false, (buffer, info, client, server, datas)->
-  console.log(info)
   info.pass=info.pass.trim()
   client.pass = info.pass
   
@@ -1792,11 +1791,10 @@ ygopro.ctos_follow 'CREATE_GAME', false, (buffer, info, client, server, datas)->
     log.warn("BAD NAME LEVEL 1", client.name, client.ip)
     ygopro.stoc_die(client, "${bad_name_level1}")
   else
-    console.log('aaa')
     room = new Room(info)
     if !room
       ygopro.stoc_die(client, "${server_full}")
-    client.setTimeout(600000) #连接后超时5分钟
+    client.setTimeout(300000) #连接后超时5分钟
     client.rid = _.indexOf(ROOM_all, room)
     room.connect(client)
     ygopro.stoc_send(client, 'CREATE_GAME', {
