@@ -4080,6 +4080,7 @@
                     draw_count: room.hostinfo.info.draw_count,
                     time_limit: room.hostinfo.info.time_limit,
                     rule: room.hostinfo.info.rule,
+                    banlist_hash: room.lflist,
                     users: _.sortBy((function() {
                       var len4, o, ref2, results1;
                       ref2 = room.players;

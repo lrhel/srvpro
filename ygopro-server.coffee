@@ -3132,6 +3132,7 @@ if settings.modules.http
           draw_count : room.hostinfo.info.draw_count,
           time_limit : room.hostinfo.info.time_limit,
           rule : room.hostinfo.info.rule,
+          banlist_hash: room.lflist,
           users: _.sortBy((for player in room.players when player.pos?
             id: (-1).toString(),
             name: player.name,
