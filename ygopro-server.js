@@ -4074,7 +4074,8 @@
                     team1: room.hostinfo.info.team1,
                     team2: room.hostinfo.info.team2,
                     best_of: room.hostinfo.info.best_of,
-                    duel_flag: room.hostinfo.info.forbidden_types,
+                    duel_flag: room.hostinfo.info.duel_flag,
+                    forbidden_types: room.hostinfo.info.forbidden_types,
                     extra_rules: room.hostinfo.info.extra_rules,
                     start_lp: room.hostinfo.info.start_lp,
                     start_hand: room.hostinfo.info.start_hand,
@@ -4083,7 +4084,7 @@
                     rule: room.hostinfo.info.rule,
                     no_check: room.hostinfo.info.no_check_deck,
                     no_shuffle: room.hostinfo.info.no_shuffle_deck,
-                    banlist_hash: room.lflist,
+                    banlist_hash: room.hostinfo.info.lflist,
                     users: _.sortBy((function() {
                       var len4, o, ref2, results1;
                       ref2 = room.players;
