@@ -3125,6 +3125,7 @@ if settings.modules.http
           needpass: !!room.pass,
           team1: room.hostinfo.info.team1,
           team2: room.hostinfo.info.team2,
+          best_of: room.hostinfo.info.best_of,
           duel_flag: room.hostinfo.info.forbidden_types,
           extra_rules: room.hostinfo.info.extra_rules,
           start_lp : room.hostinfo.info.start_lp,
@@ -3132,6 +3133,8 @@ if settings.modules.http
           draw_count : room.hostinfo.info.draw_count,
           time_limit : room.hostinfo.info.time_limit,
           rule : room.hostinfo.info.rule,
+          no_check : room.hostinfo.info.no_check_deck,
+          no_shuffle : room.hostinfo.info.no_shuffle_deck,
           banlist_hash: room.lflist,
           users: _.sortBy((for player in room.players when player.pos?
             id: (-1).toString(),
