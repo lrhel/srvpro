@@ -1021,6 +1021,7 @@ class Room
   constructor: (info) ->
     @name = info.name
     @pass = info.pass
+    @notes = info.notes
     @hostinfo = {}
     @hostinfo.lflist = info.info.lflist
     @hostinfo.rule = info.info.rule
@@ -3139,6 +3140,7 @@ if settings.modules.http
         roomsjson = JSON.stringify rooms: (for room in ROOM_all when room and room.established
           roomid: room.game_id,
           roomname: room.name,
+          roomnotes: room.notes,
           roommode: room.hostinfo.mode,
           needpass: !!room.pass,
           team1: room.hostinfo.team1,

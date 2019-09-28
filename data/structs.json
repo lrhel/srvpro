@@ -47,7 +47,8 @@
     "CTOS_CreateGame": [
         {"name": "info", "type": "HostInfo"},
         {"name": "name", "type": "unsigned short", "length": 20, "encoding": "UTF-16LE"},
-        {"name": "pass", "type": "unsigned short", "length": 20, "encoding": "UTF-16LE"}
+        {"name": "pass", "type": "unsigned short", "length": 20, "encoding": "UTF-16LE"},
+        {"name": "notes", "type": "unsigned char", "length": 200, "encoding": "utf8"}
     ],
     "CTOS_JoinGame": [
         {"name": "version", "type": "unsigned short"},

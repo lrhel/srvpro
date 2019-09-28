@@ -34,6 +34,9 @@
           case "UTF-16LE":
             result.chars(field.name, field.length * 2, field.encoding);
             break;
+          case "utf8":
+            result.chars(field.name, field.length * 2, field.encoding);
+            break;
           default:
             throw "unsupported encoding: " + field.encoding;
         }

@@ -21,6 +21,7 @@ for name, declaration of structs_declaration
     if field.encoding
       switch field.encoding
         when "UTF-16LE" then result.chars field.name, field.length*2, field.encoding
+        when "utf8" then result.chars field.name, field.length*2, field.encoding
         else throw "unsupported encoding: #{field.encoding}"
     else
       type = field.type

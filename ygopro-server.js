@@ -1328,6 +1328,7 @@
     function Room(info) {
       this.name = info.name;
       this.pass = info.pass;
+      this.notes = info.notes;
       this.hostinfo = {};
       this.hostinfo.lflist = info.info.lflist;
       this.hostinfo.rule = info.info.rule;
@@ -2365,7 +2366,7 @@
     } else {
       room = ROOM_find_by_game_id(info.gameid);
       if (!room) {
-        ygopro.stoc_die(client, "${server_full}");
+        ygopro.stoc_die(client, "${room_not_found}");
       } else if (room.error) {
         ygopro.stoc_die(client, room.error);
       } else if (room.duel_stage !== ygopro.constants.DUEL_STAGE.BEGIN) {
@@ -4086,6 +4087,7 @@
                   results.push({
                     roomid: room.game_id,
                     roomname: room.name,
+                    roomnotes: room.notes,
                     roommode: room.hostinfo.mode,
                     needpass: !!room.pass,
                     team1: room.hostinfo.team1,
