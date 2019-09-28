@@ -1018,9 +1018,27 @@ SOCKET_flush_data = global.SOCKET_flush_data = (sk, datas) ->
   return true
 
 class Room
-  constructor: (@hostinfo) ->
-    @name = @hostinfo.name
-    @pass = @hostinfo.pass
+  constructor: (info) ->
+    @name = info.name
+    @pass = info.pass
+    @hostinfo = {}
+    @hostinfo.lflist = info.info.lflist
+    @hostinfo.rule = info.info.rule
+    @hostinfo.mode = info.info.mode
+    @hostinfo.duel_rule = info.info.duel_rule
+    @hostinfo.no_check_deck = info.info.no_check_deck
+    @hostinfo.no_shuffle_deck = info.info.no_shuffle_deck
+    @hostinfo.start_lp = info.info.start_lp
+    @hostinfo.start_hand = info.info.start_hand
+    @hostinfo.draw_count = info.info.draw_count
+    @hostinfo.time_limit = info.info.time_limit
+    @hostinfo.handshake = info.info.handshake
+    @hostinfo.team1 = info.info.team1
+    @hostinfo.team2 = info.info.team2
+    @hostinfo.best_of = info.info.best_of
+    @hostinfo.duel_flag = info.info.duel_flag
+    @hostinfo.forbidden_types = info.info.forbidden_types
+    @hostinfo.extra_rules = info.info.extra_rules
     #@alive = true
     @players = []
     @player_datas = []
@@ -3121,22 +3139,22 @@ if settings.modules.http
         roomsjson = JSON.stringify rooms: (for room in ROOM_all when room and room.established
           roomid: room.game_id,
           roomname: room.name,
-          roommode: room.hostinfo.info.mode,
+          roommode: room.hostinfo.mode,
           needpass: !!room.pass,
-          team1: room.hostinfo.info.team1,
-          team2: room.hostinfo.info.team2,
-          best_of: room.hostinfo.info.best_of,
-          duel_flag: room.hostinfo.info.duel_flag,
-          forbidden_types: room.hostinfo.info.forbidden_types,
-          extra_rules: room.hostinfo.info.extra_rules,
-          start_lp : room.hostinfo.info.start_lp,
-          start_hand : room.hostinfo.info.start_hand,
-          draw_count : room.hostinfo.info.draw_count,
-          time_limit : room.hostinfo.info.time_limit,
-          rule : room.hostinfo.info.rule,
-          no_check : room.hostinfo.info.no_check_deck,
-          no_shuffle : room.hostinfo.info.no_shuffle_deck,
-          banlist_hash: room.hostinfo.info.lflist,
+          team1: room.hostinfo.team1,
+          team2: room.hostinfo.team2,
+          best_of: room.hostinfo.best_of,
+          duel_flag: room.hostinfo.duel_flag,
+          forbidden_types: room.hostinfo.forbidden_types,
+          extra_rules: room.hostinfo.extra_rules,
+          start_lp : room.hostinfo.start_lp,
+          start_hand : room.hostinfo.start_hand,
+          draw_count : room.hostinfo.draw_count,
+          time_limit : room.hostinfo.time_limit,
+          rule : room.hostinfo.rule,
+          no_check : room.hostinfo.no_check_deck,
+          no_shuffle : room.hostinfo.no_shuffle_deck,
+          banlist_hash: room.hostinfo.lflist,
           users: _.sortBy((for player in room.players when player.pos?
             id: (-1).toString(),
             name: player.name,

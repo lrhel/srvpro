@@ -1325,10 +1325,27 @@
   };
 
   Room = (function() {
-    function Room(hostinfo) {
-      this.hostinfo = hostinfo;
-      this.name = this.hostinfo.name;
-      this.pass = this.hostinfo.pass;
+    function Room(info) {
+      this.name = info.name;
+      this.pass = info.pass;
+      this.hostinfo = {};
+      this.hostinfo.lflist = info.info.lflist;
+      this.hostinfo.rule = info.info.rule;
+      this.hostinfo.mode = info.info.mode;
+      this.hostinfo.duel_rule = info.info.duel_rule;
+      this.hostinfo.no_check_deck = info.info.no_check_deck;
+      this.hostinfo.no_shuffle_deck = info.info.no_shuffle_deck;
+      this.hostinfo.start_lp = info.info.start_lp;
+      this.hostinfo.start_hand = info.info.start_hand;
+      this.hostinfo.draw_count = info.info.draw_count;
+      this.hostinfo.time_limit = info.info.time_limit;
+      this.hostinfo.handshake = info.info.handshake;
+      this.hostinfo.team1 = info.info.team1;
+      this.hostinfo.team2 = info.info.team2;
+      this.hostinfo.best_of = info.info.best_of;
+      this.hostinfo.duel_flag = info.info.duel_flag;
+      this.hostinfo.forbidden_types = info.info.forbidden_types;
+      this.hostinfo.extra_rules = info.info.extra_rules;
       this.players = [];
       this.player_datas = [];
       this.status = 'starting';
@@ -4069,22 +4086,22 @@
                   results.push({
                     roomid: room.game_id,
                     roomname: room.name,
-                    roommode: room.hostinfo.info.mode,
+                    roommode: room.hostinfo.mode,
                     needpass: !!room.pass,
-                    team1: room.hostinfo.info.team1,
-                    team2: room.hostinfo.info.team2,
-                    best_of: room.hostinfo.info.best_of,
-                    duel_flag: room.hostinfo.info.duel_flag,
-                    forbidden_types: room.hostinfo.info.forbidden_types,
-                    extra_rules: room.hostinfo.info.extra_rules,
-                    start_lp: room.hostinfo.info.start_lp,
-                    start_hand: room.hostinfo.info.start_hand,
-                    draw_count: room.hostinfo.info.draw_count,
-                    time_limit: room.hostinfo.info.time_limit,
-                    rule: room.hostinfo.info.rule,
-                    no_check: room.hostinfo.info.no_check_deck,
-                    no_shuffle: room.hostinfo.info.no_shuffle_deck,
-                    banlist_hash: room.hostinfo.info.lflist,
+                    team1: room.hostinfo.team1,
+                    team2: room.hostinfo.team2,
+                    best_of: room.hostinfo.best_of,
+                    duel_flag: room.hostinfo.duel_flag,
+                    forbidden_types: room.hostinfo.forbidden_types,
+                    extra_rules: room.hostinfo.extra_rules,
+                    start_lp: room.hostinfo.start_lp,
+                    start_hand: room.hostinfo.start_hand,
+                    draw_count: room.hostinfo.draw_count,
+                    time_limit: room.hostinfo.time_limit,
+                    rule: room.hostinfo.rule,
+                    no_check: room.hostinfo.no_check_deck,
+                    no_shuffle: room.hostinfo.no_shuffle_deck,
+                    banlist_hash: room.hostinfo.lflist,
                     users: _.sortBy((function() {
                       var len4, o, ref2, results1;
                       ref2 = room.players;
