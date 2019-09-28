@@ -37,6 +37,7 @@
     "invalid_password_unauthorized": "Password invalid (Unauthorized)",
     "invalid_password_existed": "Password invalid (Already Existed)",
     "invalid_password_not_found": "Password invalid (Not Found)",
+    "room_not_found": "Room not found",
     "invalid_password_action": "Password invalid (Invalid Action)",
     "invalid_password_checksum": "Password incorrect (Checksum Failed) (Please re-login your account.)",
     "bad_user_name": "Please enter the correct ID",

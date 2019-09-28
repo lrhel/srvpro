@@ -1881,7 +1881,7 @@ ygopro.ctos_follow 'JOIN_GAME', false, (buffer, info, client, server, datas)->
     #log.info 'join_game',info.pass, client.name
     room = ROOM_find_by_game_id(info.gameid)
     if !room
-      ygopro.stoc_die(client, "${server_full}")
+      ygopro.stoc_die(client, "${room_not_found}")
     else if room.error
       ygopro.stoc_die(client, room.error)
     else if room.duel_stage != ygopro.constants.DUEL_STAGE.BEGIN
