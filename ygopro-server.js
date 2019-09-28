@@ -4107,7 +4107,7 @@
                       }
                       return results1;
                     })(), "pos"),
-                    istart: room.duel_stage !== ygopro.constants.DUEL_STAGE.BEGIN ? (settings.modules.http.show_info ? "Duel:" + room.duel_count + " " + (room.duel_stage === ygopro.constants.DUEL_STAGE.SIDING ? "Siding" : "Turn:" + (room.turn != null ? room.turn : 0) + (room.death ? "/" + (room.death > 0 ? room.death - 1 : "Death") : "")) : 'start') : 'wait'
+                    istart: room.duel_stage !== ygopro.constants.DUEL_STAGE.BEGIN ? 'start' : 'wait'
                   });
                 }
               }

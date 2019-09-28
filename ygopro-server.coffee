@@ -3148,7 +3148,7 @@ if settings.modules.http
             ) else null,
             pos: player.pos
           ), "pos"),
-          istart: if room.duel_stage != ygopro.constants.DUEL_STAGE.BEGIN then (if settings.modules.http.show_info then ("Duel:" + room.duel_count + " " + (if room.duel_stage == ygopro.constants.DUEL_STAGE.SIDING then "Siding" else "Turn:" + (if room.turn? then room.turn else 0) + (if room.death then "/" + (if room.death > 0 then room.death - 1 else "Death") else ""))) else 'start') else 'wait'
+          istart: if room.duel_stage != ygopro.constants.DUEL_STAGE.BEGIN then 'start' else 'wait'
         ), null, 2
         response.end(addCallback(u.query.callback, roomsjson))
 
