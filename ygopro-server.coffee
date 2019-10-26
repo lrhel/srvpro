@@ -1063,7 +1063,7 @@ class Room
     update_core_paths()
     @core_path = get_latest_core_path()
     #now = new Date().getTime();
-    @game_id = ((Math.floor(new Date().getTime() / 4) + @cloud_replay_id) & 0xffffffff)
+    @game_id = (((Math.floor(new Date().getTime() / 4) + @cloud_replay_id) & 0xffffffff) >>> 0)
     ROOM_all.push this
 
     #if lflists.length

@@ -1367,7 +1367,7 @@
       this.first_list = [];
       update_core_paths();
       this.core_path = get_latest_core_path();
-      this.game_id = (Math.floor(new Date().getTime() / 4) + this.cloud_replay_id) & 0xffffffff;
+      this.game_id = ((Math.floor(new Date().getTime() / 4) + this.cloud_replay_id) & 0xffffffff) >>> 0;
       ROOM_all.push(this);
       try {
         this.process = spawn('./ygopro', (this.core_path ? [0, core_path] : [0]), {
