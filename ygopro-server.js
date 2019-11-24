@@ -1395,7 +1395,6 @@
           return function(data) {
             _this.established = true;
             _this.port = parseInt(data);
-            console.log(_this.port);
             if (_this.port === settings.port) {
               _this.process.kill();
               _.each(_this.players, function(player) {
@@ -2326,7 +2325,7 @@
   });
 
   ygopro.ctos_follow('JOIN_GAME', false, function(buffer, info, client, server, datas) {
-    var name, room;
+    var len3, n, name, ref2, room;
     info.pass = info.pass.trim();
     client.pass = info.pass;
     if (!client.name || client.name === "") {
@@ -2377,7 +2376,17 @@
           ygopro.stoc_send_chat_to_room(room, client.name + " ${watch_join}");
           room.watchers.push(client);
           ygopro.stoc_send_chat(client, "${watch_watching}", ygopro.constants.COLORS.BABYBLUE);
-          room.connect(client);
+          ygopro.stoc_send(client, 'CATCHUP', {
+            val: 1
+          });
+          ref2 = room.watcher_buffers;
+          for (n = 0, len3 = ref2.length; n < len3; n++) {
+            buffer = ref2[n];
+            client.write(buffer);
+          }
+          ygopro.stoc_send(client, 'CATCHUP', {
+            val: 0
+          });
         } else {
           ygopro.stoc_die(client, "${watch_denied}");
         }
@@ -2459,7 +2468,7 @@
         });
         ygopro.ctos_send(watcher, 'JOIN_GAME', {
           version: settings.version,
-          pass: "the Big Brother"
+          pass: room.pass
         });
         ygopro.ctos_send(watcher, 'HS_TOOBSERVER');
       });

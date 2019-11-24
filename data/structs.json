@@ -113,5 +113,8 @@
     ],
     "chat": [
         {"name": "msg", "type": "unsigned short", "length":"255", "encoding": "UTF-16LE"}
+    ],
+    "STOC_Catchup": [
+        {"name": "val", "type": "unsigned char"}
     ]
 }

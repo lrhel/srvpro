@@ -25,6 +25,7 @@
         "REPLAY": "",
         "TIME_LIMIT": "STOC_TimeLimit",
         "CHAT": "STOC_Chat",
-		"CREATE_GAME": "STOC_CreateGame"
+		"CREATE_GAME": "STOC_CreateGame",
+		"CATCHUP": "STOC_Catchup"
     }
 }

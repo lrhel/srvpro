@@ -1088,7 +1088,6 @@ class Room
         @established = true
         #roomlist.create(this) if !@windbot and settings.modules.http.websocket_roomlist
         @port = parseInt data
-        console.log(@port)
         if @port == settings.port
           @process.kill()
           _.each @players, (player)->
@@ -1893,7 +1892,15 @@ ygopro.ctos_follow 'JOIN_GAME', false, (buffer, info, client, server, datas)->
         ygopro.stoc_send_chat_to_room(room, "#{client.name} ${watch_join}")
         room.watchers.push client
         ygopro.stoc_send_chat(client, "${watch_watching}", ygopro.constants.COLORS.BABYBLUE)
-        room.connect(client)
+        # room.connect(client)
+        ygopro.stoc_send(client, 'CATCHUP', {
+              val: 1
+            })
+        for buffer in room.watcher_buffers
+            client.write buffer
+        ygopro.stoc_send(client, 'CATCHUP', {
+              val: 0
+            })
       else
         ygopro.stoc_die(client, "${watch_denied}")
     else if room.hostinfo.no_watch and room.players.length >= (if room.hostinfo.mode == 2 then 4 else 2)
@@ -1961,7 +1968,7 @@ ygopro.stoc_follow 'JOIN_GAME', false, (buffer, info, client, server, datas)->
       }
       ygopro.ctos_send watcher, 'JOIN_GAME', {
         version: settings.version,
-        pass: "the Big Brother"
+        pass: room.pass
       }
       ygopro.ctos_send watcher, 'HS_TOOBSERVER'
       return
