@@ -609,7 +609,7 @@
         room = _.find(ROOM_all, function(room) {
           return path === room.core_path;
         });
-        if (room) {
+        if (!room) {
           rmdir("./ygopro/cores/" + path, function(error) {});
         }
       }

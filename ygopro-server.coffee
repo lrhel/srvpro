@@ -502,7 +502,7 @@ delete_outdated_cores = global.delete_outdated_cores = () ->
         for path in CORES_list[..].pop()
             room = _.find ROOM_all, (room)->
                 path == room.core_path
-            if room
+            if !room
                rmdir "./ygopro/cores/#{path}", (error)->
         update_core_paths()
 
