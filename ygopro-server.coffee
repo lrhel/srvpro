@@ -2978,47 +2978,47 @@ ygopro.stoc_follow 'CHANGE_SIDE', false, (buffer, info, client, server, datas)->
     room.last_active_time = moment()
   return
 
-ygopro.stoc_follow 'REPLAY', true, (buffer, info, client, server, datas)->
-  room=ROOM_all[client.rid]
-  return settings.modules.tournament_mode.enabled and settings.modules.tournament_mode.replay_safe and settings.modules.tournament_mode.block_replay_to_player or settings.modules.replay_delay unless room
-  if settings.modules.cloud_replay.enabled and room.random_type
-    Cloud_replay_ids.push room.cloud_replay_id
-  if !room.replays[room.duel_count - 1]
+# ygopro.stoc_follow 'REPLAY', true, (buffer, info, client, server, datas)->
+  # room=ROOM_all[client.rid]
+  # return settings.modules.tournament_mode.enabled and settings.modules.tournament_mode.replay_safe and settings.modules.tournament_mode.block_replay_to_player or settings.modules.replay_delay unless room
+  # if settings.modules.cloud_replay.enabled and room.random_type
+    # Cloud_replay_ids.push room.cloud_replay_id
+  # if !room.replays[room.duel_count - 1]
     # console.log("Replay saved: ", room.duel_count - 1, client.pos)
-    room.replays[room.duel_count - 1] = buffer
-  if settings.modules.tournament_mode.enabled and settings.modules.tournament_mode.replay_safe
-    if client.pos == 0
-      dueltime=moment().format('YYYY-MM-DD HH-mm-ss')
-      replay_filename=dueltime
-      if room.hostinfo.mode != 2
-        for player,i in room.dueling_players
-          replay_filename=replay_filename + (if i > 0 then " VS " else " ") + player.name
-      else
-        for player,i in room.dueling_players
-          replay_filename=replay_filename + (if i > 0 then (if i == 2 then " VS " else " & ") else " ") + player.name
-      replay_filename=replay_filename.replace(/[\/\\\?\*]/g, '_')+".yrp"
-      duellog = {
-        time: dueltime,
-        name: room.name + (if settings.modules.tournament_mode.show_info then (" (Duel:" + room.duel_count + ")") else ""),
-        roomid: room.process_pid.toString(),
-        cloud_replay_id: "R#"+room.cloud_replay_id,
-        replay_filename: replay_filename,
-        roommode: room.hostinfo.mode,
-        players: (for player in room.dueling_players
-          name: player.name + (if settings.modules.tournament_mode.show_ip and !player.is_local then (" (IP: " + player.ip.slice(7) + ")") else "") + (if settings.modules.tournament_mode.show_info and not (room.hostinfo.mode == 2 and player.pos % 2 > 0) then (" (Score:" + room.scores[player.name_vpass] + " LP:" + (if player.lp? then player.lp else room.hostinfo.start_lp) + (if room.hostinfo.mode != 2 then (" Cards:" + (if player.card_count? then player.card_count else room.hostinfo.start_hand)) else "") + ")") else ""),
-          winner: player.pos == room.winner
-        )
-      }
-      duel_log.duel_log.unshift duellog
-      setting_save(duel_log)
-      fs.writeFile(settings.modules.tournament_mode.replay_path + replay_filename, buffer, (err)->
-        if err then log.warn "SAVE REPLAY ERROR", replay_filename, err
-      )
-    if settings.modules.cloud_replay.enabled
-      ygopro.stoc_send_chat(client, "${cloud_replay_delay_part1}R##{room.cloud_replay_id}${cloud_replay_delay_part2}", ygopro.constants.COLORS.BABYBLUE)
-    return settings.modules.tournament_mode.block_replay_to_player or settings.modules.replay_delay and room.hostinfo.mode == 1
-  else
-    return settings.modules.replay_delay and room.hostinfo.mode == 1
+    # room.replays[room.duel_count - 1] = buffer
+  # if settings.modules.tournament_mode.enabled and settings.modules.tournament_mode.replay_safe
+    # if client.pos == 0
+      # dueltime=moment().format('YYYY-MM-DD HH-mm-ss')
+      # replay_filename=dueltime
+      # if room.hostinfo.mode != 2
+        # for player,i in room.dueling_players
+          # replay_filename=replay_filename + (if i > 0 then " VS " else " ") + player.name
+      # else
+        # for player,i in room.dueling_players
+          # replay_filename=replay_filename + (if i > 0 then (if i == 2 then " VS " else " & ") else " ") + player.name
+      # replay_filename=replay_filename.replace(/[\/\\\?\*]/g, '_')+".yrp"
+      # duellog = {
+        # time: dueltime,
+        # name: room.name + (if settings.modules.tournament_mode.show_info then (" (Duel:" + room.duel_count + ")") else ""),
+        # roomid: room.process_pid.toString(),
+        # cloud_replay_id: "R#"+room.cloud_replay_id,
+        # replay_filename: replay_filename,
+        # roommode: room.hostinfo.mode,
+        # players: (for player in room.dueling_players
+          # name: player.name + (if settings.modules.tournament_mode.show_ip and !player.is_local then (" (IP: " + player.ip.slice(7) + ")") else "") + (if settings.modules.tournament_mode.show_info and not (room.hostinfo.mode == 2 and player.pos % 2 > 0) then (" (Score:" + room.scores[player.name_vpass] + " LP:" + (if player.lp? then player.lp else room.hostinfo.start_lp) + (if room.hostinfo.mode != 2 then (" Cards:" + (if player.card_count? then player.card_count else room.hostinfo.start_hand)) else "") + ")") else ""),
+          # winner: player.pos == room.winner
+        # )
+      # }
+      # duel_log.duel_log.unshift duellog
+      # setting_save(duel_log)
+      # fs.writeFile(settings.modules.tournament_mode.replay_path + replay_filename, buffer, (err)->
+        # if err then log.warn "SAVE REPLAY ERROR", replay_filename, err
+      # )
+    # if settings.modules.cloud_replay.enabled
+      # ygopro.stoc_send_chat(client, "${cloud_replay_delay_part1}R##{room.cloud_replay_id}${cloud_replay_delay_part2}", ygopro.constants.COLORS.BABYBLUE)
+    # return settings.modules.tournament_mode.block_replay_to_player or settings.modules.replay_delay and room.hostinfo.mode == 1
+  # else
+    # return settings.modules.replay_delay and room.hostinfo.mode == 1
 
 if settings.modules.random_duel.enabled
   setInterval ()->
