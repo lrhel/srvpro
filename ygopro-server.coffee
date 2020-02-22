@@ -2060,7 +2060,6 @@ ygopro.stoc_follow_after 'GAME_MSG', true, (buffer, info, client, server, datas)
 
   if ygopro.constants.MSG[msg] == 'SELECT_YESNO'
     stringid = buffer.readUInt32LE(2)
-    console.log("string:" + stringid)
     if stringid == 1989
       room.update_spectator_buffer()
   return false

@@ -2570,7 +2570,6 @@
     msg = buffer.readInt8(0);
     if (ygopro.constants.MSG[msg] === 'SELECT_YESNO') {
       stringid = buffer.readUInt32LE(2);
-      console.log("string:" + stringid);
       if (stringid === 1989) {
         room.update_spectator_buffer();
       }
