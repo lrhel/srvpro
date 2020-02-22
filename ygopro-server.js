@@ -1704,6 +1704,56 @@
       return true;
     };
 
+    Room.prototype.update_spectator_buffer = function() {
+      var buffer, header, len3, n, player, ref2, struct, watcher;
+      this.watcher_buffers = [];
+      watcher = this.watcher;
+      struct = ygopro.structs[ygopro.proto_structs.STOC['JOIN_GAME']];
+      struct.allocate();
+      struct.set(this.join_game_buffer);
+      buffer = struct.buffer();
+      header = Buffer.allocUnsafe(3);
+      header.writeUInt16LE(buffer.length + 1, 0);
+      header.writeUInt8(0x12, 2);
+      this.watcher_buffers.push(header);
+      this.watcher_buffers.push(buffer);
+      struct = ygopro.structs[ygopro.proto_structs.STOC['TYPE_CHANGE']];
+      struct.allocate();
+      struct.set({
+        type: 7
+      });
+      buffer = struct.buffer();
+      header = Buffer.allocUnsafe(3);
+      header.writeUInt16LE(buffer.length + 1, 0);
+      header.writeUInt8(0x13, 2);
+      this.watcher_buffers.push(header);
+      this.watcher_buffers.push(buffer);
+      ref2 = this.players;
+      for (n = 0, len3 = ref2.length; n < len3; n++) {
+        player = ref2[n];
+        struct = ygopro.structs[ygopro.proto_structs.STOC['HS_PLAYER_ENTER']];
+        struct.allocate();
+        struct.set({
+          name: player.name,
+          pos: player.pos
+        });
+        buffer = struct.buffer();
+        header = Buffer.allocUnsafe(3);
+        header.writeUInt16LE(buffer.length + 1, 0);
+        header.writeUInt8(0x20, 2);
+        this.watcher_buffers.push(header);
+        this.watcher_buffers.push(buffer);
+      }
+      header = Buffer.allocUnsafe(3);
+      header.writeUInt16LE(1, 0);
+      header.writeUInt8(0x15, 2);
+      this.watcher_buffers.push(header);
+      header = Buffer.allocUnsafe(3);
+      header.writeUInt16LE(1, 0);
+      header.writeUInt8(0x8, 2);
+      this.watcher_buffers.push(header);
+    };
+
     Room.prototype.add_windbot = function(botdata) {
       this.windbot = botdata;
       request({
@@ -2510,6 +2560,33 @@
   if (settings.modules.dialogues.get) {
     load_dialogues();
   }
+
+  ygopro.stoc_follow_after('GAME_MSG', true, function(buffer, info, client, server, datas) {
+    var msg, room, stringid;
+    room = ROOM_all[client.rid];
+    if (!(room && !client.reconnecting)) {
+      return;
+    }
+    msg = buffer.readInt8(0);
+    if (ygopro.constants.MSG[msg] === 'SELECT_YESNO') {
+      stringid = buffer.readUInt32LE(2);
+      console.log("string:" + stringid);
+      if (stringid === 1989) {
+        room.update_spectator_buffer();
+      }
+    }
+    return false;
+  });
+
+  ygopro.stoc_follow_after('WAITING_SIDE', true, function(buffer, info, client, server, datas) {
+    var room;
+    room = ROOM_all[client.rid];
+    if (!room) {
+      return;
+    }
+    room.update_spectator_buffer();
+    return false;
+  });
 
   ygopro.stoc_follow('GAME_MSG', true, function(buffer, info, client, server, datas) {
     var card, chain, check, count, cpos, deck_found, found, hint_type, i, id, len3, len4, len5, len6, limbo_found, line, loc, max_loop, msg, n, o, oppo_pos, p, phase, player, playertype, pos, ppos, q, r, reason, ref2, ref3, ref4, ref5, ref6, ref7, room, trigger_location, val, win_pos;

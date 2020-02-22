@@ -1306,6 +1306,54 @@ class Room
       CLIENT_send_replays(player, this)
     return true
 
+  update_spectator_buffer: () ->
+    @watcher_buffers = []
+    watcher=@watcher
+    struct = ygopro.structs[ygopro.proto_structs.STOC['JOIN_GAME']]
+    struct.allocate()
+    struct.set(@join_game_buffer)
+    buffer = struct.buffer()
+    header = Buffer.allocUnsafe(3)
+    header.writeUInt16LE(buffer.length + 1, 0)
+    header.writeUInt8(0x12, 2)
+    @watcher_buffers.push(header)
+    @watcher_buffers.push(buffer)
+
+    struct = ygopro.structs[ygopro.proto_structs.STOC['TYPE_CHANGE']]
+    struct.allocate()
+    struct.set({
+        type: 7
+    })
+    buffer = struct.buffer()
+    header = Buffer.allocUnsafe(3)
+    header.writeUInt16LE(buffer.length + 1, 0)
+    header.writeUInt8(0x13, 2)
+    @watcher_buffers.push(header)
+    @watcher_buffers.push(buffer)
+	
+    for player in @players
+      struct = ygopro.structs[ygopro.proto_structs.STOC['HS_PLAYER_ENTER']]
+      struct.allocate();
+      struct.set({
+       name: player.name,
+       pos: player.pos
+      });
+      buffer = struct.buffer()
+      header = Buffer.allocUnsafe(3)
+      header.writeUInt16LE(buffer.length + 1, 0)
+      header.writeUInt8(0x20, 2)
+      @watcher_buffers.push(header)
+      @watcher_buffers.push(buffer)
+    header = Buffer.allocUnsafe(3)
+    header.writeUInt16LE(1, 0)
+    header.writeUInt8(0x15, 2)
+    @watcher_buffers.push(header)
+    header = Buffer.allocUnsafe(3)
+    header.writeUInt16LE(1, 0)
+    header.writeUInt8(0x8, 2)
+    @watcher_buffers.push(header)
+    return
+
   add_windbot: (botdata)->
     @windbot = botdata
     request
@@ -2004,6 +2052,24 @@ load_dialogues = global.load_dialogues = () ->
 
 if settings.modules.dialogues.get
   load_dialogues()
+
+ygopro.stoc_follow_after 'GAME_MSG', true, (buffer, info, client, server, datas)->
+  room=ROOM_all[client.rid]
+  return unless room and !client.reconnecting
+  msg = buffer.readInt8(0)
+
+  if ygopro.constants.MSG[msg] == 'SELECT_YESNO'
+    stringid = buffer.readUInt32LE(2)
+    console.log("string:" + stringid)
+    if stringid == 1989
+      room.update_spectator_buffer()
+  return false
+
+ygopro.stoc_follow_after 'WAITING_SIDE', true, (buffer, info, client, server, datas)->
+  room=ROOM_all[client.rid]
+  return unless room
+  room.update_spectator_buffer()
+  return false
 
 ygopro.stoc_follow 'GAME_MSG', true, (buffer, info, client, server, datas)->
   room=ROOM_all[client.rid]
