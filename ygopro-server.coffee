@@ -1878,6 +1878,13 @@ ygopro.ctos_follow 'JOIN_GAME', false, (buffer, info, client, server, datas)->
   # else 
   if !client.name or client.name==""
     ygopro.stoc_die(client, "${bad_user_name}")
+	
+  else if info.version != settings.version # and (info.version < 9020 or settings.version != 4927) #强行兼容23333版
+    ygopro.stoc_send client, 'ERROR_MSG', {
+      msg: 5
+      code: settings.version
+    }
+    CLIENT_kick(client)
 
   else if ROOM_connected_ip[client.ip] > 5
     log.warn("MULTI LOGIN", client.name, client.ip)

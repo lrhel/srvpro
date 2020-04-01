@@ -2379,6 +2379,12 @@
     client.pass = info.pass;
     if (!client.name || client.name === "") {
       ygopro.stoc_die(client, "${bad_user_name}");
+    } else if (info.version !== settings.version) {
+      ygopro.stoc_send(client, 'ERROR_MSG', {
+        msg: 5,
+        code: settings.version
+      });
+      CLIENT_kick(client);
     } else if (ROOM_connected_ip[client.ip] > 5) {
       log.warn("MULTI LOGIN", client.name, client.ip);
       ygopro.stoc_die(client, "${too_much_connection}" + client.ip);
