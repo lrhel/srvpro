@@ -2643,74 +2643,74 @@ ygopro.ctos_follow 'CHAT', true, (buffer, info, client, server, datas)->
   msg = _.trim(info.msg)
   cancel = _.startsWith(msg, "/")
   room.last_active_time = moment() unless cancel or not (room.random_type or room.arena) or room.duel_stage == ygopro.constants.DUEL_STAGE.FINGER or room.duel_stage == ygopro.constants.DUEL_STAGE.FIRSTGO or room.duel_stage == ygopro.constants.DUEL_STAGE.SIDING
-  cmd = msg.split(' ')
-  switch cmd[0]
-    when '/投降', '/surrender'
-      if room.duel_stage == ygopro.constants.DUEL_STAGE.BEGIN or room.hostinfo.mode == 2
-        return cancel
-      if room.random_type and room.turn < 3
-        ygopro.stoc_send_chat(client, "${surrender_denied}", ygopro.constants.COLORS.BABYBLUE)
-        return cancel
-      if client.surrend_confirm
-        ygopro.ctos_send(client.server, 'SURRENDER')
-      else
-        ygopro.stoc_send_chat(client, "${surrender_confirm}", ygopro.constants.COLORS.BABYBLUE)
-        client.surrend_confirm = true
+  # cmd = msg.split(' ')
+  # switch cmd[0]
+    # when '/投降', '/surrender'
+      # if room.duel_stage == ygopro.constants.DUEL_STAGE.BEGIN or room.hostinfo.mode == 2
+        # return cancel
+      # if room.random_type and room.turn < 3
+        # ygopro.stoc_send_chat(client, "${surrender_denied}", ygopro.constants.COLORS.BABYBLUE)
+        # return cancel
+      # if client.surrend_confirm
+        # ygopro.ctos_send(client.server, 'SURRENDER')
+      # else
+        # ygopro.stoc_send_chat(client, "${surrender_confirm}", ygopro.constants.COLORS.BABYBLUE)
+        # client.surrend_confirm = true
 
-    when '/help'
-      ygopro.stoc_send_chat(client, "${chat_order_main}")
-      ygopro.stoc_send_chat(client, "${chat_order_help}")
-      ygopro.stoc_send_chat(client, "${chat_order_roomname}") if !settings.modules.mycard.enabled
-      ygopro.stoc_send_chat(client, "${chat_order_windbot}") if settings.modules.windbot.enabled
-      ygopro.stoc_send_chat(client, "${chat_order_tip}") if settings.modules.tips.enabled
-      ygopro.stoc_send_chat(client, "${chat_order_chatcolor_1}") if settings.modules.chat_color.enabled
-      ygopro.stoc_send_chat(client, "${chat_order_chatcolor_2}") if settings.modules.chat_color.enabled
+    # when '/help'
+      # ygopro.stoc_send_chat(client, "${chat_order_main}")
+      # ygopro.stoc_send_chat(client, "${chat_order_help}")
+      # ygopro.stoc_send_chat(client, "${chat_order_roomname}") if !settings.modules.mycard.enabled
+      # ygopro.stoc_send_chat(client, "${chat_order_windbot}") if settings.modules.windbot.enabled
+      # ygopro.stoc_send_chat(client, "${chat_order_tip}") if settings.modules.tips.enabled
+      # ygopro.stoc_send_chat(client, "${chat_order_chatcolor_1}") if settings.modules.chat_color.enabled
+      # ygopro.stoc_send_chat(client, "${chat_order_chatcolor_2}") if settings.modules.chat_color.enabled
 
-    when '/tip'
-      ygopro.stoc_send_random_tip(client) if settings.modules.tips.enabled
+    # when '/tip'
+      # ygopro.stoc_send_random_tip(client) if settings.modules.tips.enabled
 
-    when '/ai'
-      if settings.modules.windbot.enabled and client.is_host and !settings.modules.challonge.enabled and !room.arena and room.random_type != 'M'
-        if name = cmd[1]
-          windbot = _.sample _.filter windbots, (w)->
-            w.name == name or w.deck == name
-          if !windbot
-            ygopro.stoc_send_chat(client, "${windbot_deck_not_found}", ygopro.constants.COLORS.RED)
-            return
-        else
-          windbot = _.sample windbots
-        if room.random_type
-          ygopro.stoc_send_chat(client, "${windbot_disable_random_room} " + room.name, ygopro.constants.COLORS.BABYBLUE)
-        room.add_windbot(windbot)
+    # when '/ai'
+      # if settings.modules.windbot.enabled and client.is_host and !settings.modules.challonge.enabled and !room.arena and room.random_type != 'M'
+        # if name = cmd[1]
+          # windbot = _.sample _.filter windbots, (w)->
+            # w.name == name or w.deck == name
+          # if !windbot
+            # ygopro.stoc_send_chat(client, "${windbot_deck_not_found}", ygopro.constants.COLORS.RED)
+            # return
+        # else
+          # windbot = _.sample windbots
+        # if room.random_type
+          # ygopro.stoc_send_chat(client, "${windbot_disable_random_room} " + room.name, ygopro.constants.COLORS.BABYBLUE)
+        # room.add_windbot(windbot)
 
-    when '/roomname'
-      ygopro.stoc_send_chat(client, "${room_name} " + room.name, ygopro.constants.COLORS.BABYBLUE) if room
+    # when '/roomname'
+      # ygopro.stoc_send_chat(client, "${room_name} " + room.name, ygopro.constants.COLORS.BABYBLUE) if room
 
-    when '/color'
-      if settings.modules.chat_color.enabled
-        cip = CLIENT_get_authorize_key(client)
-        if cmsg = cmd[1]
-          if cmsg.toLowerCase() == "help"
-            ygopro.stoc_send_chat(client, "${show_color_list}", ygopro.constants.COLORS.BABYBLUE)
-            for cname,cvalue of ygopro.constants.COLORS when cvalue > 10
-              ygopro.stoc_send_chat(client, cname, cvalue)
-          else if cmsg.toLowerCase() == "default"
-            chat_color.save_list[cip] = false
-            setting_save(chat_color)
-            ygopro.stoc_send_chat(client, "${set_chat_color_default}", ygopro.constants.COLORS.BABYBLUE)
-          else
-            ccolor = cmsg.toUpperCase()
-            if ygopro.constants.COLORS[ccolor] and ygopro.constants.COLORS[ccolor] > 10 and ygopro.constants.COLORS[ccolor] < 20
-              chat_color.save_list[cip] = ccolor
-              setting_save(chat_color)
-              ygopro.stoc_send_chat(client, "${set_chat_color_part1}" + ccolor + "${set_chat_color_part2}", ygopro.constants.COLORS.BABYBLUE)
-            else
-              ygopro.stoc_send_chat(client, "${color_not_found_part1}" + ccolor + "${color_not_found_part2}", ygopro.constants.COLORS.RED)
-        else
-          if color = chat_color.save_list[cip]
-            ygopro.stoc_send_chat(client, "${get_chat_color_part1}" + color + "${get_chat_color_part2}", ygopro.constants.COLORS.BABYBLUE)
-          else
-            ygopro.stoc_send_chat(client, "${get_chat_color_default}", ygopro.constants.COLORS.BABYBLUE)
+    # when '/color'
+      # if settings.modules.chat_color.enabled
+        # cip = CLIENT_get_authorize_key(client)
+        # if cmsg = cmd[1]
+          # if cmsg.toLowerCase() == "help"
+            # ygopro.stoc_send_chat(client, "${show_color_list}", ygopro.constants.COLORS.BABYBLUE)
+            # for cname,cvalue of ygopro.constants.COLORS when cvalue > 10
+              # ygopro.stoc_send_chat(client, cname, cvalue)
+          # else if cmsg.toLowerCase() == "default"
+            # chat_color.save_list[cip] = false
+            # setting_save(chat_color)
+            # ygopro.stoc_send_chat(client, "${set_chat_color_default}", ygopro.constants.COLORS.BABYBLUE)
+          # else
+            # ccolor = cmsg.toUpperCase()
+            # if ygopro.constants.COLORS[ccolor] and ygopro.constants.COLORS[ccolor] > 10 and ygopro.constants.COLORS[ccolor] < 20
+              # chat_color.save_list[cip] = ccolor
+              # setting_save(chat_color)
+              # ygopro.stoc_send_chat(client, "${set_chat_color_part1}" + ccolor + "${set_chat_color_part2}", ygopro.constants.COLORS.BABYBLUE)
+            # else
+              # ygopro.stoc_send_chat(client, "${color_not_found_part1}" + ccolor + "${color_not_found_part2}", ygopro.constants.COLORS.RED)
+        # else
+          # if color = chat_color.save_list[cip]
+            # ygopro.stoc_send_chat(client, "${get_chat_color_part1}" + color + "${get_chat_color_part2}", ygopro.constants.COLORS.BABYBLUE)
+          # else
+            # ygopro.stoc_send_chat(client, "${get_chat_color_default}", ygopro.constants.COLORS.BABYBLUE)
 
     #when '/test'
     #  ygopro.stoc_send_hint_card_to_room(room, 2333365)
