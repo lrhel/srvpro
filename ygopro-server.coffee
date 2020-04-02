@@ -263,13 +263,6 @@ catch
   chat_color = global.chat_color = default_data.chat_color
   setting_save(chat_color)
 
-try
-  cppversion = parseInt(fs.readFileSync('ygopro/gframe/game.cpp', 'utf8').match(/PRO_VERSION = ([x\dABCDEF]+)/)[1], '16')
-  setting_change(settings, "version", cppversion)
-  log.info "ygopro version 0x"+settings.version.toString(16), "(from source code)"
-catch
-  #settings.version = settings.version_default
-  log.info "ygopro version 0x"+settings.version.toString(16), "(from config)"
 # load the lflist of current date
 lflists = global.lflists = []
 # expansions/lflist
@@ -1879,7 +1872,7 @@ ygopro.ctos_follow 'JOIN_GAME', false, (buffer, info, client, server, datas)->
   if !client.name or client.name==""
     ygopro.stoc_die(client, "${bad_user_name}")
 	
-  else if info.version != settings.version # and (info.version < 9020 or settings.version != 4927) #强行兼容23333版
+  else if info.version2 != settings.version # and (info.version < 9020 or settings.version != 4927) #强行兼容23333版
     ygopro.stoc_send client, 'ERROR_MSG', {
       msg: 5
       code: settings.version

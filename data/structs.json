@@ -54,7 +54,8 @@
         {"name": "version", "type": "unsigned short"},
         {"name": "align", "type": "unsigned short"},
         {"name": "gameid", "type": "unsigned int"},
-        {"name": "pass", "type": "unsigned short", "length": 20, "encoding": "UTF-16LE"}
+        {"name": "pass", "type": "unsigned short", "length": 20, "encoding": "UTF-16LE"},
+        {"name": "version2", "type": "unsigned int"}
     ],
     "CTOS_Kick": [
         {"name": "pos", "type": "unsigned char"}
