@@ -1849,6 +1849,27 @@ ygopro.ctos_follow 'CREATE_GAME', false, (buffer, info, client, server, datas)->
   , name = client.name)
     log.warn("BAD NAME LEVEL 1", client.name, client.ip)
     ygopro.stoc_die(client, "${bad_name_level1}")
+
+  else if _.any(badwords.level3, (badword) ->
+    regexp = new RegExp(badword, 'i')
+    return name.match(regexp)
+  , name = info.notes)
+    log.warn("BAD NOTES LEVEL 3", client.name, client.ip)
+    ygopro.stoc_die(client, "${bad_notes_level3}")
+
+  else if _.any(badwords.level2, (badword) ->
+    regexp = new RegExp(badword, 'i')
+    return name.match(regexp)
+  , name = info.notes)
+    log.warn("BAD NOTES LEVEL 2", client.name, client.ip)
+    ygopro.stoc_die(client, "${bad_notes_level2}")
+
+  else if _.any(badwords.level1, (badword) ->
+    regexp = new RegExp(badword, 'i')
+    return name.match(regexp)
+  , name = info.notes)
+    log.warn("BAD NOTES LEVEL 1", client.name, client.ip)
+    ygopro.stoc_die(client, "${bad_notes_level1}")
   else
     room = new Room(info)
     if !room
