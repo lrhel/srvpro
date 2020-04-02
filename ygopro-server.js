@@ -3362,7 +3362,7 @@
   };
 
   ygopro.ctos_follow('CHAT', true, function(buffer, info, client, server, datas) {
-    var cancel, ccolor, cip, cmd, cmsg, cname, color, cvalue, msg, name, oldmsg, ref2, room, struct, windbot;
+    var cancel, msg, oldmsg, room, struct;
     room = ROOM_all[client.rid];
     if (!room) {
       return;
@@ -3371,108 +3371,6 @@
     cancel = _.startsWith(msg, "/");
     if (!(cancel || !(room.random_type || room.arena) || room.duel_stage === ygopro.constants.DUEL_STAGE.FINGER || room.duel_stage === ygopro.constants.DUEL_STAGE.FIRSTGO || room.duel_stage === ygopro.constants.DUEL_STAGE.SIDING)) {
       room.last_active_time = moment();
-    }
-    cmd = msg.split(' ');
-    switch (cmd[0]) {
-      case '/投降':
-      case '/surrender':
-        if (room.duel_stage === ygopro.constants.DUEL_STAGE.BEGIN || room.hostinfo.mode === 2) {
-          return cancel;
-        }
-        if (room.random_type && room.turn < 3) {
-          ygopro.stoc_send_chat(client, "${surrender_denied}", ygopro.constants.COLORS.BABYBLUE);
-          return cancel;
-        }
-        if (client.surrend_confirm) {
-          ygopro.ctos_send(client.server, 'SURRENDER');
-        } else {
-          ygopro.stoc_send_chat(client, "${surrender_confirm}", ygopro.constants.COLORS.BABYBLUE);
-          client.surrend_confirm = true;
-        }
-        break;
-      case '/help':
-        ygopro.stoc_send_chat(client, "${chat_order_main}");
-        ygopro.stoc_send_chat(client, "${chat_order_help}");
-        if (!settings.modules.mycard.enabled) {
-          ygopro.stoc_send_chat(client, "${chat_order_roomname}");
-        }
-        if (settings.modules.windbot.enabled) {
-          ygopro.stoc_send_chat(client, "${chat_order_windbot}");
-        }
-        if (settings.modules.tips.enabled) {
-          ygopro.stoc_send_chat(client, "${chat_order_tip}");
-        }
-        if (settings.modules.chat_color.enabled) {
-          ygopro.stoc_send_chat(client, "${chat_order_chatcolor_1}");
-        }
-        if (settings.modules.chat_color.enabled) {
-          ygopro.stoc_send_chat(client, "${chat_order_chatcolor_2}");
-        }
-        break;
-      case '/tip':
-        if (settings.modules.tips.enabled) {
-          ygopro.stoc_send_random_tip(client);
-        }
-        break;
-      case '/ai':
-        if (settings.modules.windbot.enabled && client.is_host && !settings.modules.challonge.enabled && !room.arena && room.random_type !== 'M') {
-          if (name = cmd[1]) {
-            windbot = _.sample(_.filter(windbots, function(w) {
-              return w.name === name || w.deck === name;
-            }));
-            if (!windbot) {
-              ygopro.stoc_send_chat(client, "${windbot_deck_not_found}", ygopro.constants.COLORS.RED);
-              return;
-            }
-          } else {
-            windbot = _.sample(windbots);
-          }
-          if (room.random_type) {
-            ygopro.stoc_send_chat(client, "${windbot_disable_random_room} " + room.name, ygopro.constants.COLORS.BABYBLUE);
-          }
-          room.add_windbot(windbot);
-        }
-        break;
-      case '/roomname':
-        if (room) {
-          ygopro.stoc_send_chat(client, "${room_name} " + room.name, ygopro.constants.COLORS.BABYBLUE);
-        }
-        break;
-      case '/color':
-        if (settings.modules.chat_color.enabled) {
-          cip = CLIENT_get_authorize_key(client);
-          if (cmsg = cmd[1]) {
-            if (cmsg.toLowerCase() === "help") {
-              ygopro.stoc_send_chat(client, "${show_color_list}", ygopro.constants.COLORS.BABYBLUE);
-              ref2 = ygopro.constants.COLORS;
-              for (cname in ref2) {
-                cvalue = ref2[cname];
-                if (cvalue > 10) {
-                  ygopro.stoc_send_chat(client, cname, cvalue);
-                }
-              }
-            } else if (cmsg.toLowerCase() === "default") {
-              chat_color.save_list[cip] = false;
-              setting_save(chat_color);
-              ygopro.stoc_send_chat(client, "${set_chat_color_default}", ygopro.constants.COLORS.BABYBLUE);
-            } else {
-              ccolor = cmsg.toUpperCase();
-              if (ygopro.constants.COLORS[ccolor] && ygopro.constants.COLORS[ccolor] > 10 && ygopro.constants.COLORS[ccolor] < 20) {
-                chat_color.save_list[cip] = ccolor;
-                setting_save(chat_color);
-                ygopro.stoc_send_chat(client, "${set_chat_color_part1}" + ccolor + "${set_chat_color_part2}", ygopro.constants.COLORS.BABYBLUE);
-              } else {
-                ygopro.stoc_send_chat(client, "${color_not_found_part1}" + ccolor + "${color_not_found_part2}", ygopro.constants.COLORS.RED);
-              }
-            }
-          } else {
-            if (color = chat_color.save_list[cip]) {
-              ygopro.stoc_send_chat(client, "${get_chat_color_part1}" + color + "${get_chat_color_part2}", ygopro.constants.COLORS.BABYBLUE);
-            } else {
-              ygopro.stoc_send_chat(client, "${get_chat_color_default}", ygopro.constants.COLORS.BABYBLUE);
-            }
-          }
-        }
     }
     if (msg.length > 100) {
       log.warn("SPAM WORD", client.name, client.ip, msg);
