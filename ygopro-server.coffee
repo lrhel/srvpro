@@ -2036,7 +2036,7 @@ ygopro.stoc_follow 'JOIN_GAME', false, (buffer, info, client, server, datas)->
         name: "the Big Brother"
       }
       ygopro.ctos_send watcher, 'JOIN_GAME', {
-        version: settings.version,
+        version2: settings.version,
         pass: room.pass
       }
       ygopro.ctos_send watcher, 'HS_TOOBSERVER'

@@ -2535,7 +2535,7 @@
           name: "the Big Brother"
         });
         ygopro.ctos_send(watcher, 'JOIN_GAME', {
-          version: settings.version,
+          version2: settings.version,
           pass: room.pass
         });
         ygopro.ctos_send(watcher, 'HS_TOOBSERVER');
