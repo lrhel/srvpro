@@ -473,15 +473,16 @@ ban_user = global.ban_user = (name) ->
 
 update_core_paths = global.update_core_paths = () ->
   if settings.live_core
-    files = fs.readdirSync("./ygopro/cores")
     dirs = []
-    for file in files
-      if file[0] != '.'
-        filePath = "./ygopro/cores/#{file}"
-        stat = fs.statSync(filePath)
-        if stat.isDirectory()
-          dirs.push(file)
-    _.sortBy(dirs, (name)-> return name)
+    try
+      files = fs.readdirSync("./ygopro/cores")
+      for file in files
+        if file[0] != '.'
+          filePath = "./ygopro/cores/#{file}"
+          stat = fs.statSync(filePath)
+          if stat.isDirectory()
+            dirs.push(file)
+      _.sortBy(dirs, (name)-> return name)
     CORES_list = dirs[..]
 
 get_latest_core_path = global.get_latest_core_path = () ->

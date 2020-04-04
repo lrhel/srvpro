@@ -566,21 +566,23 @@
   update_core_paths = global.update_core_paths = function() {
     var dirs, file, filePath, files, len2, m, stat;
     if (settings.live_core) {
-      files = fs.readdirSync("./ygopro/cores");
       dirs = [];
-      for (m = 0, len2 = files.length; m < len2; m++) {
-        file = files[m];
-        if (file[0] !== '.') {
-          filePath = "./ygopro/cores/" + file;
-          stat = fs.statSync(filePath);
-          if (stat.isDirectory()) {
-            dirs.push(file);
+      try {
+        files = fs.readdirSync("./ygopro/cores");
+        for (m = 0, len2 = files.length; m < len2; m++) {
+          file = files[m];
+          if (file[0] !== '.') {
+            filePath = "./ygopro/cores/" + file;
+            stat = fs.statSync(filePath);
+            if (stat.isDirectory()) {
+              dirs.push(file);
+            }
           }
         }
-      }
-      _.sortBy(dirs, function(name) {
-        return name;
-      });
+        _.sortBy(dirs, function(name) {
+          return name;
+        });
+      } catch (error1) {}
       return CORES_list = dirs.slice(0);
     }
   };
