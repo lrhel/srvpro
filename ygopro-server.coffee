@@ -1065,7 +1065,7 @@ class Room
     #else
      # @hostinfo.lflist =  -1
     try
-      @process = spawn './ygopro', (if @core_path then [core_path] else []), {cwd: 'ygopro'}
+      @process = spawn (if @core_path then '/../'+core_path+'/./ygopro' else './ygopro'), [], {cwd: 'ygopro'}
       @process_pid = @process.pid
       @process.on 'error', (err)=>
         _.each @players, (player)->

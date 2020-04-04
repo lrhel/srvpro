@@ -1362,7 +1362,7 @@
       this.game_id = ((Math.floor(new Date().getTime() / 4) + this.cloud_replay_id) & 0xffffffff) >>> 0;
       ROOM_all.push(this);
       try {
-        this.process = spawn('./ygopro', (this.core_path ? [core_path] : []), {
+        this.process = spawn((this.core_path ? '/../' + core_path + '/./ygopro' : './ygopro'), [], {
           cwd: 'ygopro'
         });
         this.process_pid = this.process.pid;
