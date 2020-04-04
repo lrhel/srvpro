@@ -472,18 +472,17 @@ ban_user = global.ban_user = (name) ->
   return
 
 update_core_paths = global.update_core_paths = () ->
-if settings.live_core
+  if settings.live_core
     files = fs.readdirSync("./ygopro/cores")
     dirs = []
     for file in files
-        if file[0] != '.'
-            filePath = "./ygopro/cores/#{file}"
-            stat = fs.statSync(filePath)
-            if stat.isDirectory()
-                dirs.push(file)
+      if file[0] != '.'
+        filePath = "./ygopro/cores/#{file}"
+        stat = fs.statSync(filePath)
+        if stat.isDirectory()
+          dirs.push(file)
     _.sortBy(dirs, (name)-> return name)
-    CORES_list = dirs
-    return dirs.pop()
+    CORES_list = dirs[..]
 
 get_latest_core_path = global.get_latest_core_path = () ->
     if settings.live_core
@@ -492,12 +491,15 @@ get_latest_core_path = global.get_latest_core_path = () ->
 delete_outdated_cores = global.delete_outdated_cores = () ->
     if settings.live_core
         update_core_paths()
-        for path in CORES_list[..].pop()
-            room = _.find ROOM_all, (room)->
-                path == room.core_path
-            if !room
-               rmdir "./ygopro/cores/#{path}", (error)->
-        update_core_paths()
+        list = CORES_list[..]
+        list.pop()
+        if list.length>0 && ROOM_all.length>0
+            for path in list
+                room = _.find ROOM_all, (room)->
+                    room && path == room.core_path
+                if !room
+                    rmdir "./ygopro/cores/#{path}", (error)->
+            update_core_paths()
 
 # automatically ban user to use random duel
 ROOM_ban_player = global.ROOM_ban_player = (name, ip, reason, countadd = 1)->
@@ -1065,7 +1067,7 @@ class Room
     #else
      # @hostinfo.lflist =  -1
     try
-      @process = spawn (if @core_path then '/../'+core_path+'/./ygopro' else './ygopro'), [], {cwd: 'ygopro'}
+      @process = spawn (if @core_path then './cores/'+@core_path+'/./ygopro' else './ygopro'), [], {cwd: 'ygopro'}
       @process_pid = @process.pid
       @process.on 'error', (err)=>
         _.each @players, (player)->

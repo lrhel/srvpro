@@ -3,7 +3,7 @@
   "bot_token": "",
   "port": 7911,
   "version": 4930,
-  "live_core": false,
+  "live_core": true,
   "hostinfo": {
     "lflist": 0,
     "rule": 0,
