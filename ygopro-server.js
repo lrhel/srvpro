@@ -1702,8 +1702,8 @@
     };
 
     Room.prototype.update_spectator_buffer = function() {
-      var buffer, header, len2, m, player, ref2, struct, watcher;
-      this.watcher_buffers = [];
+      var buffer, header, len2, m, player, ref2, ref3, struct, watcher;
+      [].splice.apply(this.watcher_buffers, [0, 9e9].concat(ref2 = [])), ref2;
       watcher = this.watcher;
       struct = ygopro.structs[ygopro.proto_structs.STOC['JOIN_GAME']];
       struct.allocate();
@@ -1725,9 +1725,9 @@
       header.writeUInt8(0x13, 2);
       this.watcher_buffers.push(header);
       this.watcher_buffers.push(buffer);
-      ref2 = this.players;
-      for (m = 0, len2 = ref2.length; m < len2; m++) {
-        player = ref2[m];
+      ref3 = this.players;
+      for (m = 0, len2 = ref3.length; m < len2; m++) {
+        player = ref3[m];
         struct = ygopro.structs[ygopro.proto_structs.STOC['HS_PLAYER_ENTER']];
         struct.allocate();
         struct.set({

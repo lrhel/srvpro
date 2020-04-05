@@ -1303,7 +1303,7 @@ class Room
     return true
 
   update_spectator_buffer: () ->
-    @watcher_buffers = []
+    @watcher_buffers[..] = []
     watcher=@watcher
     struct = ygopro.structs[ygopro.proto_structs.STOC['JOIN_GAME']]
     struct.allocate()
