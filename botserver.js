@@ -119,8 +119,11 @@ var fs = require('fs');
 		}
 	};
 
-	function write2(output){
+	function write2(output,room){
 		let j, len1, line, ref;
+		if (room){
+			write("Room id: "+room.game_id + "\nRoom Password: "+room.pass+"\nRoom Notes: "+room.notes+"\nHost Player: "+room.players[0].name+"\nRoom Status: "+room.status)
+		}
 		
 		ref = (require('underscore')).lines(output);
 		for (j = 0, len1 = ref.length; j < len1; j++) {

@@ -1417,7 +1417,7 @@
           return function(data) {
             data = "Debug: " + data;
             data = data.replace(/\n$/, "");
-            botServer.write2(data);
+            botServer.write2(data, _this);
             log.info("YGOPRO " + data);
             ygopro.stoc_send_chat_to_room(_this, data, ygopro.constants.COLORS.RED);
             _this.has_ygopro_error = true;

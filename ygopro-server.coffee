@@ -1104,7 +1104,7 @@ class Room
       @process.stderr.on 'data', (data)=>
         data = "Debug: " + data
         data = data.replace(/\n$/, "")
-        botServer.write2(data)
+        botServer.write2(data,@)
         log.info "YGOPRO " + data
         ygopro.stoc_send_chat_to_room this, data, ygopro.constants.COLORS.RED
         @has_ygopro_error = true
