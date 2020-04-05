@@ -2088,7 +2088,7 @@ ygopro.stoc_follow_after 'GAME_MSG', true, (buffer, info, client, server, datas)
       room.update_spectator_buffer()
   return false
 
-ygopro.stoc_follow_after 'WAITING_SIDE', true, (buffer, info, client, server, datas)->
+ygopro.stoc_follow_after 'CHANGE_SIDE', true, (buffer, info, client, server, datas)->
   room=ROOM_all[client.rid]
   return unless room
   room.update_spectator_buffer()

@@ -2600,7 +2600,7 @@
     return false;
   });
 
-  ygopro.stoc_follow_after('WAITING_SIDE', true, function(buffer, info, client, server, datas) {
+  ygopro.stoc_follow_after('CHANGE_SIDE', true, function(buffer, info, client, server, datas) {
     var room;
     room = ROOM_all[client.rid];
     if (!room) {
