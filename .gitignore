@@ -3,10 +3,10 @@ jsconfig.json
 coffeelint.json
 .vscode/
 .vs/
-
+data/
 channels.txt
 controlers.txt
-
+badwords.json
 password.json
 config.*.json
 config.user.bak

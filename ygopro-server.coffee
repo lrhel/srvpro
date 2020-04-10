@@ -1,4 +1,3 @@
-# 标准库
 net = require 'net'
 http = require 'http'
 url = require 'url'
@@ -76,7 +75,6 @@ import_datas = global.import_datas = [
   "last_game_msg_title",
   "last_hint_msg",
   "start_deckbuf",
-  "challonge_info",
   "ready_trap",
   "join_time",
   "arena_quit_free",
@@ -223,11 +221,6 @@ if settings.hostinfo.enable_priority or settings.hostinfo.enable_priority == fal
     settings.hostinfo.duel_rule = 4
   delete settings.hostinfo.enable_priority
   imported = true
-#import the old Challonge api key option
-if settings.modules.challonge.api_key
-  settings.modules.challonge.options.apiKey = settings.modules.challonge.api_key
-  delete settings.modules.challonge.api_key
-  imported = true
 #finish
 if imported
   setting_save(settings)
@@ -288,17 +281,6 @@ if settings.modules.cloud_replay.enabled
     log.warn err
     return
 
-if settings.modules.windbot.enabled
-  windbots = global.windbots = loadJSON(settings.modules.windbot.botlist).windbots
-  real_windbot_server_ip = global.real_windbot_server_ip = settings.modules.windbot.server_ip
-  if !settings.modules.windbot.server_ip.includes("127.0.0.1")
-    dns = require('dns')
-    dns.lookup(settings.modules.windbot.server_ip,(err,addr) ->
-      if(!err)
-        real_windbot_server_ip = global.real_windbot_server_ip = addr
-    )
-
-
 if settings.modules.heartbeat_detection.enabled
   long_resolve_cards = global.long_resolve_cards = loadJSON('./data/long_resolve_cards.json')
 
@@ -345,79 +327,6 @@ if settings.modules.mycard.enabled
         #else
         #  log.info 'ARENA INIT POST OK', response.statusCode, response.statusMessage
       return
-
-if settings.modules.challonge.enabled
-  challonge_module_name = 'challonge'
-  if settings.modules.challonge.use_custom_module
-    challonge_module_name = settings.modules.challonge.use_custom_module
-  challonge = global.challonge = require(challonge_module_name).createClient(settings.modules.challonge.options)
-  if settings.modules.challonge.cache_ttl
-    challonge_cache = []
-  challonge_queue_callbacks = [[], []]
-  is_requesting = [null, null]
-  get_callback = (challonge_type, _callback) ->
-    return ((err, data) ->
-      if settings.modules.challonge.cache_ttl and !err and data
-        challonge_cache[challonge_type] = data
-      is_requesting[challonge_type] =null
-      _callback(err, data)
-      while challonge_queue_callbacks[challonge_type].length
-        cur_callback = challonge_queue_callbacks[challonge_type].splice(0, 1)[0]
-        cur_callback(err, data)
-      return
-    )
-  challonge.participants._index = (_data) ->
-    if settings.modules.challonge.cache_ttl and challonge_cache[0]
-      _data.callback(null, challonge_cache[0])
-    else if is_requesting[0] and moment() - is_requesting[0] <= 5000
-      challonge_queue_callbacks[0].push(_data.callback)
-    else
-      _data.callback = get_callback(0, _data.callback)
-      is_requesting[0] = moment()
-      try
-        challonge.participants.index(_data)
-      catch err
-        _data.callback(err, null)
-    return 
-  challonge.matches._index = (_data) ->
-    if settings.modules.challonge.cache_ttl and challonge_cache[1]
-      _data.callback(null, challonge_cache[1])
-    else if is_requesting[1] and moment() - is_requesting[1] <= 5000
-      challonge_queue_callbacks[1].push(_data.callback)
-    else
-      _data.callback = get_callback(1, _data.callback)
-      is_requesting[1] = moment()
-      try
-        challonge.matches.index(_data)
-      catch err
-        _data.callback(err, null)
-    return
-  challonge.matches._update = (_data) ->
-    try
-      challonge.matches.update(_data)
-    catch err
-      log.warn("Errored pushing scores to Challonge.", err)
-    return
-  refresh_challonge_cache = global.refresh_challonge_cache = () ->
-    if settings.modules.challonge.cache_ttl
-      challonge_cache[0] = null
-      challonge_cache[1] = null
-    return
-  refresh_challonge_cache()
-  # challonge.participants._index({
-  #   id: settings.modules.challonge.tournament_id,
-  #   callback: (() ->
-  #     challonge.matches._index({
-  #       id: settings.modules.challonge.tournament_id,
-  #       callback: (() ->
-  #         return
-  #       )
-  #     })
-  #     return
-  #   )
-  # })
-  if settings.modules.challonge.cache_ttl
-    setInterval(refresh_challonge_cache, settings.modules.challonge.cache_ttl)
 
 # 获取可用内存
 memory_usage = global.memory_usage = 0
@@ -580,8 +489,6 @@ if settings.modules.random_duel.post_match_scores
 
 ROOM_find_or_create_by_name = global.ROOM_find_or_create_by_name = (name, player_ip)->
   uname=name.toUpperCase()
-  if settings.modules.windbot.enabled and (uname[0...2] == 'AI' or (!settings.modules.random_duel.enabled and uname == ''))
-    return ROOM_find_or_create_ai(name)
   if settings.modules.random_duel.enabled and (uname == '' or uname == 'S' or uname == 'M' or uname == 'T')
     return ROOM_find_or_create_random(uname, player_ip)
   if room = ROOM_find_by_name(name)
@@ -608,7 +515,7 @@ ROOM_find_or_create_random = global.ROOM_find_or_create_random = (type, player_i
   max_player = if type == 'T' then 4 else 2
   playerbanned = (bannedplayer and bannedplayer.count > 3 and moment() < bannedplayer.time)
   result = _.find ROOM_all, (room)->
-    return room and room.random_type != '' and room.duel_stage == ygopro.constants.DUEL_STAGE.BEGIN and !room.windbot and
+    return room and room.random_type != '' and room.duel_stage == ygopro.constants.DUEL_STAGE.BEGIN and
     ((type == '' and (room.random_type == 'S' or (settings.modules.random_duel.blank_pass_match and room.random_type != 'T'))) or room.random_type == type) and
     room.get_playing_player().length < max_player and
     (settings.modules.random_duel.no_rematch_check or room.get_host() == null or
@@ -629,34 +536,6 @@ ROOM_find_or_create_random = global.ROOM_find_or_create_random = (type, player_i
   else
     return null
   if result.random_type=='M' then result.welcome = result.welcome + '\n${random_duel_enter_room_match}'
-  return result
-
-ROOM_find_or_create_ai = global.ROOM_find_or_create_ai = (name)->
-  if name == ''
-    name = 'AI'
-  namea = name.split('#')
-  uname = name.toUpperCase()
-  if room = ROOM_find_by_name(name)
-    return room
-  else if uname == 'AI'
-    windbot = _.sample windbots
-    name = 'AI#' + Math.floor(Math.random() * 100000)
-  else if namea.length>1
-    ainame = namea[namea.length-1]
-    windbot = _.sample _.filter windbots, (w)->
-      w.name == ainame or w.deck == ainame
-    if !windbot
-      return { "error": "${windbot_deck_not_found}" }
-    name = name + ',' + Math.floor(Math.random() * 100000)
-  else
-    windbot = _.sample windbots
-    name = name + '#' + Math.floor(Math.random() * 100000)
-  if name.replace(/[^\x00-\xff]/g,"00").length>20
-    log.info "long ai name", name
-    return { "error": "${windbot_name_too_long}" }
-  result = new Room(name)
-  result.windbot = windbot
-  result.private = true
   return result
 
 ROOM_find_by_name = global.ROOM_find_by_name = (name)->
@@ -725,7 +604,7 @@ release_disconnect = global.release_disconnect = (dinfo, reconnected) ->
 CLIENT_get_authorize_key = global.CLIENT_get_authorize_key = (client) ->
   if !settings.modules.mycard.enabled and client.vpass
     return client.name_vpass
-  else if settings.modules.mycard.enabled or settings.modules.tournament_mode.enabled or settings.modules.challonge.enabled or client.is_local
+  else if client.is_local
     return client.name
   else
     return client.ip + ":" + client.name
@@ -745,7 +624,7 @@ CLIENT_reconnect_register = global.CLIENT_reconnect_register = (client, room_id,
   room = ROOM_all[room_id]
   if client.had_new_reconnection
     return false
-  if !settings.modules.reconnect.enabled or !room or client.system_kicked or client.flee_free or disconnect_list[CLIENT_get_authorize_key(client)] or client.is_post_watcher or !CLIENT_is_player(client, room) or room.duel_stage == ygopro.constants.DUEL_STAGE.BEGIN or room.windbot or (settings.modules.reconnect.auto_surrender_after_disconnect and room.hostinfo.mode != 1) or (room.random_type and room.get_disconnected_count() > 1)
+  if !settings.modules.reconnect.enabled or !room or client.system_kicked or client.flee_free or disconnect_list[CLIENT_get_authorize_key(client)] or client.is_post_watcher or !CLIENT_is_player(client, room) or room.duel_stage == ygopro.constants.DUEL_STAGE.BEGIN or (settings.modules.reconnect.auto_surrender_after_disconnect and room.hostinfo.mode != 1) or (room.random_type and room.get_disconnected_count() > 1)
     return false
   # for player in room.players
   #   if player != client and CLIENT_get_authorize_key(player) == CLIENT_get_authorize_key(client)
@@ -832,8 +711,8 @@ CLIENT_is_able_to_reconnect = global.CLIENT_is_able_to_reconnect = (client, deck
   return true
 
 CLIENT_get_kick_reconnect_target = global.CLIENT_get_kick_reconnect_target = (client, deckbuf) ->
-  for room in ROOM_all when room and room.duel_stage != ygopro.constants.DUEL_STAGE.BEGIN and !room.windbot
-    for player in room.get_playing_player() when !player.closed and player.name == client.name and (settings.modules.challonge.enabled or player.pass == client.pass) and (settings.modules.mycard.enabled or settings.modules.tournament_mode.enabled or player.ip == client.ip or (client.vpass and client.vpass == player.vpass)) and (!deckbuf or _.isEqual(player.start_deckbuf, deckbuf))
+  for room in ROOM_all when room and room.duel_stage != ygopro.constants.DUEL_STAGE.BEGIN
+    for player in room.get_playing_player() when !player.closed and player.name == client.name and (player.pass == client.pass) and (player.ip == client.ip or (client.vpass and client.vpass == player.vpass)) and (!deckbuf or _.isEqual(player.start_deckbuf, deckbuf))
       return player
   return null
 
@@ -1072,7 +951,7 @@ class Room
       @process_pid = @process.pid
       @process.on 'error', (err)=>
         _.each @players, (player)->
-          ygopro.stoc_die(player, "${create_room_failed}")
+          ygopro.stoc_die(player, err)
         this.delete()
         return
       @process.on 'exit', (code)=>
@@ -1082,7 +961,6 @@ class Room
       @process.stdout.setEncoding('utf8')
       @process.stdout.once 'data', (data)=>
         @established = true
-        #roomlist.create(this) if !@windbot and settings.modules.http.websocket_roomlist
         @port = parseInt data
         if @port == settings.port
           @process.kill()
@@ -1096,10 +974,6 @@ class Room
             player.pre_establish_buffers = []
             return
           return
-        #if @windbot
-        #  setTimeout ()=>
-         #   @add_windbot(@windbot)
-        #  , 200
         return
       @process.stderr.on 'data', (data)=>
         data = "Debug: " + data
@@ -1174,20 +1048,6 @@ class Room
           #else
           #  log.info 'SCORE POST OK', response.statusCode, response.statusMessage, @name, body
         return
-
-    if settings.modules.challonge.enabled and @duel_stage != ygopro.constants.DUEL_STAGE.BEGIN and @hostinfo.mode != 2 and !@kicked
-      room_name = @name
-      challonge.matches._update({
-        id: settings.modules.challonge.tournament_id,
-        matchId: @challonge_info.id,
-        match: @get_challonge_score(),
-        callback: (err, data) ->
-          if err
-            log.warn("Errored pushing scores to Challonge.", room_name, err)
-          else
-            refresh_challonge_cache()
-          return
-      })
     if @player_datas.length and settings.modules.cloud_replay.enabled
       replay_id = @cloud_replay_id
       if @has_ygopro_error
@@ -1233,7 +1093,7 @@ class Room
       ROOM_clear_disconnect(index)
     ROOM_all[index] = null unless index == -1
     #ROOM_all.splice(index, 1) unless index == -1
-    roomlist.delete this if !@windbot and @established and settings.modules.http.websocket_roomlist
+    roomlist.delete this if @established and settings.modules.http.websocket_roomlist
     delete_outdated_cores()
     return
 
@@ -1261,33 +1121,6 @@ class Room
     for player in @get_playing_player() when player.closed
       found++
     return found
-
-  get_challonge_score: ->
-    if !settings.modules.challonge.enabled or @duel_stage == ygopro.constants.DUEL_STAGE.BEGIN or @hostinfo.mode == 2
-      return null
-    challonge_duel_log = {}
-    if @scores[@dueling_players[0].name_vpass] > @scores[@dueling_players[1].name_vpass]
-      challonge_duel_log.winnerId = @dueling_players[0].challonge_info.id
-    else if @scores[@dueling_players[0].name_vpass] < @scores[@dueling_players[1].name_vpass]
-      challonge_duel_log.winnerId = @dueling_players[1].challonge_info.id
-    else
-      challonge_duel_log.winnerId = "tie"
-    if settings.modules.challonge.post_detailed_score
-      if @dueling_players[0].challonge_info.id == @challonge_info.player1Id and @dueling_players[1].challonge_info.id == @challonge_info.player2Id
-        challonge_duel_log.scoresCsv = @scores[@dueling_players[0].name_vpass] + "-" + @scores[@dueling_players[1].name_vpass]
-      else if @dueling_players[1].challonge_info.id == @challonge_info.player1Id and @dueling_players[0].challonge_info.id == @challonge_info.player2Id
-        challonge_duel_log.scoresCsv = @scores[@dueling_players[1].name_vpass] + "-" + @scores[@dueling_players[0].name_vpass]
-      else
-        challonge_duel_log.scoresCsv = "0-0"
-        log.warn("Score mismatch.", @name)
-    else
-      if challonge_duel_log.winnerId == @challonge_info.player1Id
-        challonge_duel_log.scoresCsv = "1-0"
-      else if challonge_duel_log.winnerId == @challonge_info.player2Id
-        challonge_duel_log.scoresCsv = "0-1"
-      else
-        challonge_duel_log.scoresCsv = "0-0"
-    return challonge_duel_log
 
   get_old_hostinfo: () -> # Just for supporting websocket roomlist in old MyCard client....
     ret = _.clone(@hostinfo)
@@ -1350,19 +1183,6 @@ class Room
     @watcher_buffers.push(header)
     return
 
-  add_windbot: (botdata)->
-    @windbot = botdata
-    request
-      url: "http://#{settings.modules.windbot.server_ip}:#{settings.modules.windbot.port}/?name=#{encodeURIComponent(botdata.name)}&deck=#{encodeURIComponent(botdata.deck)}&host=#{settings.modules.windbot.my_ip}&port=#{settings.port}&dialog=#{encodeURIComponent(botdata.dialog)}&version=#{settings.version}&password=#{encodeURIComponent(@name)}"
-    , (error, response, body)=>
-      if error
-        log.warn 'windbot add error', error, this.name
-        ygopro.stoc_send_chat_to_room(this, "${add_windbot_failed}", ygopro.constants.COLORS.RED)
-      #else
-        #log.info "windbot added"
-      return
-    return
-
   connect: (client)->
     @players.push client
     client.join_time = moment()
@@ -1378,7 +1198,7 @@ class Room
         ROOM_players_oppentlist[client.ip] = null
 
     if @established
-      roomlist.update(this) if !@windbot and @duel_stage == ygopro.constants.DUEL_STAGE.BEGIN and settings.modules.http.websocket_roomlist
+      roomlist.update(this) if @duel_stage == ygopro.constants.DUEL_STAGE.BEGIN and settings.modules.http.websocket_roomlist
       client.server.connect @port, '127.0.0.1', ->
         client.server.write buffer for buffer in client.pre_establish_buffers
         client.established = true
@@ -1416,10 +1236,10 @@ class Room
             ROOM_ban_player(client.name, client.ip, "${random_ban_reason_flee}")
             if settings.modules.random_duel.record_match_scores and @random_type == 'M'
               ROOM_player_flee(client.name_vpass)
-      if @players.length and !(@windbot and client.is_host) and !(@arena and @duel_stage == ygopro.constants.DUEL_STAGE.BEGIN and client.pos <= 3)
+      if @players.length and client.is_host) and !(@arena and @duel_stage == ygopro.constants.DUEL_STAGE.BEGIN and client.pos <= 3)
         left_name = (if settings.modules.hide_name and @duel_stage == ygopro.constants.DUEL_STAGE.BEGIN then "********" else client.name)
         # ygopro.stoc_send_chat_to_room this, "#{left_name} ${left_game}" + if error then ": #{error}" else ''
-        roomlist.update(this) if !@windbot and @duel_stage == ygopro.constants.DUEL_STAGE.BEGIN and settings.modules.http.websocket_roomlist
+        roomlist.update(this) if  @duel_stage == ygopro.constants.DUEL_STAGE.BEGIN and settings.modules.http.websocket_roomlist
         #client.room = null
       else
         @send_replays()
@@ -1480,7 +1300,7 @@ class Room
 # 网络连接
 net.createServer (client) ->
   client.ip = client.remoteAddress
-  client.is_local = client.ip and (client.ip.includes('127.0.0.1') or client.ip.includes(real_windbot_server_ip))
+  client.is_local = client.ip and (client.ip.includes('127.0.0.1'))
 
   connect_count = ROOM_connected_ip[client.ip] or 0
   if !settings.modules.test_mode.no_connect_count_limit and !client.is_local
@@ -2372,7 +2192,7 @@ ygopro.ctos_follow 'HS_TOOBSERVER', true, (buffer, info, client, server, datas)-
   if room.hostinfo.no_watch
     ygopro.stoc_send_chat(client, "${watch_denied_room}", ygopro.constants.COLORS.RED)
     return true
-  if (!room.arena and !settings.modules.challonge.enabled) or client.is_local
+  if client.is_local
     return false
   for player in room.players
     if player == client
@@ -2385,10 +2205,6 @@ ygopro.ctos_follow 'HS_KICK', true, (buffer, info, client, server, datas)->
   return unless room
   for player in room.players
     if player and player.pos == info.pos and player != client
-      if room.arena == "athletic" or settings.modules.challonge.enabled
-        ygopro.stoc_send_chat_to_room(room, "#{client.name} ${kicked_by_system}", ygopro.constants.COLORS.RED)
-        CLIENT_kick(client)
-        return true
       client.kick_count = if client.kick_count then client.kick_count+1 else 1
       if client.kick_count>=5 and room.random_type
         ygopro.stoc_send_chat_to_room(room, "#{client.name} ${kicked_by_system}", ygopro.constants.COLORS.RED)
@@ -2549,7 +2365,7 @@ ygopro.stoc_follow 'DUEL_START', false, (buffer, info, client, server, datas)->
     room.duel_stage = ygopro.constants.DUEL_STAGE.FINGER
     room.start_time = moment().format()
     room.turn = 0
-    roomlist.start room if !room.windbot and settings.modules.http.websocket_roomlist
+    roomlist.start room if settings.modules.http.websocket_roomlist
     #room.duels = []
     room.dueling_players = []
     for player in room.players when player.pos != 7
@@ -2573,7 +2389,7 @@ ygopro.stoc_follow 'DUEL_START', false, (buffer, info, client, server, datas)->
   if client.main and client.main.length
     deck_text = '#ygopro-server deck log\n#main\n' + client.main.join('\n') + '\n!side\n' + client.side.join('\n') + '\n'
     room.decks[client.name] = deck_text
-  if settings.modules.deck_log.enabled and deck_text and not client.deck_saved and not room.windbot
+  if settings.modules.deck_log.enabled and deck_text and not client.deck_saved
     deck_arena = settings.modules.deck_log.arena + '-'
     if room.arena
       deck_arena = deck_arena + room.arena
@@ -2645,78 +2461,7 @@ ygopro.ctos_follow 'CHAT', true, (buffer, info, client, server, datas)->
   return unless room
   msg = _.trim(info.msg)
   cancel = _.startsWith(msg, "/")
-  room.last_active_time = moment() unless cancel or not (room.random_type or room.arena) or room.duel_stage == ygopro.constants.DUEL_STAGE.FINGER or room.duel_stage == ygopro.constants.DUEL_STAGE.FIRSTGO or room.duel_stage == ygopro.constants.DUEL_STAGE.SIDING
-  # cmd = msg.split(' ')
-  # switch cmd[0]
-    # when '/投降', '/surrender'
-      # if room.duel_stage == ygopro.constants.DUEL_STAGE.BEGIN or room.hostinfo.mode == 2
-        # return cancel
-      # if room.random_type and room.turn < 3
-        # ygopro.stoc_send_chat(client, "${surrender_denied}", ygopro.constants.COLORS.BABYBLUE)
-        # return cancel
-      # if client.surrend_confirm
-        # ygopro.ctos_send(client.server, 'SURRENDER')
-      # else
-        # ygopro.stoc_send_chat(client, "${surrender_confirm}", ygopro.constants.COLORS.BABYBLUE)
-        # client.surrend_confirm = true
-
-    # when '/help'
-      # ygopro.stoc_send_chat(client, "${chat_order_main}")
-      # ygopro.stoc_send_chat(client, "${chat_order_help}")
-      # ygopro.stoc_send_chat(client, "${chat_order_roomname}") if !settings.modules.mycard.enabled
-      # ygopro.stoc_send_chat(client, "${chat_order_windbot}") if settings.modules.windbot.enabled
-      # ygopro.stoc_send_chat(client, "${chat_order_tip}") if settings.modules.tips.enabled
-      # ygopro.stoc_send_chat(client, "${chat_order_chatcolor_1}") if settings.modules.chat_color.enabled
-      # ygopro.stoc_send_chat(client, "${chat_order_chatcolor_2}") if settings.modules.chat_color.enabled
-
-    # when '/tip'
-      # ygopro.stoc_send_random_tip(client) if settings.modules.tips.enabled
-
-    # when '/ai'
-      # if settings.modules.windbot.enabled and client.is_host and !settings.modules.challonge.enabled and !room.arena and room.random_type != 'M'
-        # if name = cmd[1]
-          # windbot = _.sample _.filter windbots, (w)->
-            # w.name == name or w.deck == name
-          # if !windbot
-            # ygopro.stoc_send_chat(client, "${windbot_deck_not_found}", ygopro.constants.COLORS.RED)
-            # return
-        # else
-          # windbot = _.sample windbots
-        # if room.random_type
-          # ygopro.stoc_send_chat(client, "${windbot_disable_random_room} " + room.name, ygopro.constants.COLORS.BABYBLUE)
-        # room.add_windbot(windbot)
-
-    # when '/roomname'
-      # ygopro.stoc_send_chat(client, "${room_name} " + room.name, ygopro.constants.COLORS.BABYBLUE) if room
-
-    # when '/color'
-      # if settings.modules.chat_color.enabled
-        # cip = CLIENT_get_authorize_key(client)
-        # if cmsg = cmd[1]
-          # if cmsg.toLowerCase() == "help"
-            # ygopro.stoc_send_chat(client, "${show_color_list}", ygopro.constants.COLORS.BABYBLUE)
-            # for cname,cvalue of ygopro.constants.COLORS when cvalue > 10
-              # ygopro.stoc_send_chat(client, cname, cvalue)
-          # else if cmsg.toLowerCase() == "default"
-            # chat_color.save_list[cip] = false
-            # setting_save(chat_color)
-            # ygopro.stoc_send_chat(client, "${set_chat_color_default}", ygopro.constants.COLORS.BABYBLUE)
-          # else
-            # ccolor = cmsg.toUpperCase()
-            # if ygopro.constants.COLORS[ccolor] and ygopro.constants.COLORS[ccolor] > 10 and ygopro.constants.COLORS[ccolor] < 20
-              # chat_color.save_list[cip] = ccolor
-              # setting_save(chat_color)
-              # ygopro.stoc_send_chat(client, "${set_chat_color_part1}" + ccolor + "${set_chat_color_part2}", ygopro.constants.COLORS.BABYBLUE)
-            # else
-              # ygopro.stoc_send_chat(client, "${color_not_found_part1}" + ccolor + "${color_not_found_part2}", ygopro.constants.COLORS.RED)
-        # else
-          # if color = chat_color.save_list[cip]
-            # ygopro.stoc_send_chat(client, "${get_chat_color_part1}" + color + "${get_chat_color_part2}", ygopro.constants.COLORS.BABYBLUE)
-          # else
-            # ygopro.stoc_send_chat(client, "${get_chat_color_default}", ygopro.constants.COLORS.BABYBLUE)
-
-    #when '/test'
-    #  ygopro.stoc_send_hint_card_to_room(room, 2333365)
+  room.last_active_time = moment() unless cancel or not (room.random_type or room.arena) or room.duel_stage == ygopro.constants.DUEL_STAGE.FINGER or room.duel_stage == ygopro.constants.DUEL_STAGE.FIRSTGO or room.duel_stage == ygopro.constants.DUEL_STAGE.SIDING 
   if (msg.length>100)
     log.warn "SPAM WORD", client.name, client.ip, msg
     client.abuse_count=client.abuse_count+2 if client.abuse_count
@@ -2905,7 +2650,7 @@ ygopro.stoc_follow 'TIME_LIMIT', true, (buffer, info, client, server, datas)->
       return true
     else
       client.time_confirm_required = true
-  return unless settings.modules.heartbeat_detection.enabled and room.duel_stage == ygopro.constants.DUEL_STAGE.DUELING and !room.windbot
+  return unless settings.modules.heartbeat_detection.enabled and room.duel_stage == ygopro.constants.DUEL_STAGE.DUELING
   check = false
   if room.hostinfo.mode != 2
     check = (client.is_first and info.player == 0) or (!client.is_first and info.player == 1)
@@ -3044,21 +2789,7 @@ ygopro.stoc_follow 'CHANGE_SIDE', false, (buffer, info, client, server, datas)->
         ygopro.stoc_send_chat(client, "${side_remain_part1}#{client.side_tcount}${side_remain_part2}", ygopro.constants.COLORS.BABYBLUE)
     , 60000
     client.side_interval = sinterval
-  if settings.modules.challonge.enabled and settings.modules.challonge.post_score_midduel and room.hostinfo.mode != 2 and client.pos == 0
-    temp_log = JSON.parse(JSON.stringify(room.get_challonge_score()))
-    delete temp_log.winnerId
-    room_name = room.name
-    challonge.matches._update({
-      id: settings.modules.challonge.tournament_id,
-      matchId: room.challonge_info.id,
-      match: temp_log,
-      callback: (err, data) ->
-        if err
-          log.warn("Errored pushing scores to Challonge.", room_name, err)
-        else
-          refresh_challonge_cache()
-        return
-    })
+
   if room.random_type or room.arena
     if client.pos == 0
       room.waiting_for_player = client
@@ -3157,7 +2888,7 @@ if settings.modules.mycard.enabled
 
 if settings.modules.heartbeat_detection.enabled
   setInterval ()->
-    for room in ROOM_all when room and room.duel_stage != ygopro.constants.DUEL_STAGE.BEGIN and (room.hostinfo.time_limit == 0 or room.duel_stage != ygopro.constants.DUEL_STAGE.DUELING) and !room.windbot
+    for room in ROOM_all when room and room.duel_stage != ygopro.constants.DUEL_STAGE.BEGIN and (room.hostinfo.time_limit == 0 or room.duel_stage != ygopro.constants.DUEL_STAGE.DUELING)
       for player in room.get_playing_player() when player and (room.duel_stage != ygopro.constants.DUEL_STAGE.SIDING or player.selected_preduel)
         CLIENT_heartbeat_register(player, true)
     return
@@ -3170,47 +2901,6 @@ setInterval ()->
     room.start_death()
 
 , 1000
-
-# spawn windbot
-windbot_looplimit = 0
-windbot_process = global.windbot_process = null
-
-spawn_windbot = global.spawn_windbot = () ->
-  if /^win/.test(process.platform)
-    windbot_bin = 'WindBot.exe'
-    windbot_parameters = []
-  else
-    windbot_bin = 'mono'
-    windbot_parameters = ['WindBot.exe']
-  windbot_parameters.push('ServerMode=true')
-  windbot_parameters.push('ServerPort='+settings.modules.windbot.port)
-  windbot_process = spawn windbot_bin, windbot_parameters, {cwd: 'windbot'}
-  windbot_process.on 'error', (err)->
-    botServer.write('WindBot ERROR '+ err)
-    log.warn 'WindBot ERROR', err
-    if windbot_looplimit < 1000 and !rebooted
-      windbot_looplimit++
-      spawn_windbot()
-    return
-  windbot_process.on 'exit', (code)->
-    log.warn 'WindBot EXIT', code
-    if windbot_looplimit < 1000 and !rebooted
-      windbot_looplimit++
-      spawn_windbot()
-    return
-  windbot_process.stdout.setEncoding('utf8')
-  windbot_process.stdout.on 'data', (data)->
-    log.info 'WindBot:', data
-    return
-  windbot_process.stderr.setEncoding('utf8')
-  windbot_process.stderr.on 'data', (data)->
-    botServer.write('WindBot Error:'+ data)
-    log.warn 'WindBot Error:', data
-    return
-  return
-
-if settings.modules.windbot.enabled and settings.modules.windbot.spawn
-  spawn_windbot()
 
 rebooted = false
 #http
@@ -3498,8 +3188,6 @@ if settings.modules.http
           room.process.kill()
           room.delete()
         rebooted = true
-        if windbot_process
-          windbot_process.kill()
         response.writeHead(200)
         response.end(addCallback(u.query.callback, "['reboot ok', '" + u.query.reboot + "']"))
         throw "rebooted"
