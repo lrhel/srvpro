@@ -5,14 +5,14 @@ RUN npm install -g pm2
 
 # apt
 RUN apt update && \
-    env DEBIAN_FRONTEND=noninteractive apt install -y wget git build-essential libevent-dev libsqlite3-dev mono-complete p7zip-full python && \
+    env DEBIAN_FRONTEND=noninteractive apt install -y wget git build-essential libevent-dev libsqlite3-dev p7zip-full python && \
     rm -rf /var/lib/apt/lists/* 
 
 # srvpro
 COPY . /srvpro
 WORKDIR /srvpro
 RUN npm ci
-RUN mkdir decks replays logs /redis
+RUN mkdir logs /redis
 #RUN coffee -c ./ygopro-server.coffee
 
 # infos
